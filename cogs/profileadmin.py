@@ -29,6 +29,7 @@ class ProfileAdmin(commands.Cog):
         discord.app_commands.Choice(name='Poor', value=3),
         discord.app_commands.Choice(name='Homeless', value=4)
     ])
+    @app_commands.describe(charactername="The name of your character", gender="The gender of your character", difficulty="The mode you are playing on. Rich = Easy, Homeless = Hard")
     async def createprofile(self, interaction: discord.Interaction, charactername: str, gender: discord.app_commands.Choice[int], difficulty: discord.app_commands.Choice[int]):
         user_id = interaction.user.id
         user = interaction.user
@@ -90,7 +91,7 @@ class ProfileAdmin(commands.Cog):
                     return
                 else:
                     charactername, age, gender, difficulty, height, cash, bank = profile
-                    embed = discord.Embed(
+                    profile_embed = discord.Embed(
                         title=f"{user.display_name}'s Profile",
                         description=f"**Roleplay Information**\n\n"
                                     f"**Character Name:** `{charactername}`\n"
@@ -103,8 +104,11 @@ class ProfileAdmin(commands.Cog):
                                     f"**Bank:** `{utils.to_money(bank)}`",
                         colour=constants.colorHexes['MediumBlue']
                     )
-                    await interaction.response.send_message(embed=embed)
 
+                    if user.avatar:
+                        profile_embed.set_thumbnail(url=user.avatar.url)
+
+                    await interaction.response.send_message(embed=profile_embed)
                     
     @app_commands.command(name="deleteprofile", description="Deletes your profile.")
     async def deleteprofile(self, interaction: discord.Interaction):
@@ -122,6 +126,7 @@ class ProfileAdmin(commands.Cog):
                     await interaction.response.send_message(embed=discord.Embed(description="`Profile deleted successfully.`", colour=constants.colorHexes["Success"]), ephemeral=True)
         
     @app_commands.command(name="addmoney", description="Adds money to a profile.")
+    @app_commands.describe(user="The user to give money to", amount="The amount of money")
     async def addmoney(self, interaction: discord.Interaction, user: discord.Member, amount: int):
         user_id = user.id
         guild_id = interaction.guild.id
@@ -156,6 +161,7 @@ class ProfileAdmin(commands.Cog):
                 
     
     @app_commands.command(name="removemoney", description="Removes money from a profile.")
+    @app_commands.describe(user="The user to take money from", amount="The amount of money")
     async def removemoney(self, interaction: discord.Interaction, user: discord.Member, amount: int):
         user_id = user.id
         guild_id = interaction.guild.id
