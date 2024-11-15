@@ -38,3 +38,17 @@ Discord, a popular platform for communities to gather and communicate, has seen 
 - The bot seamlessly integrates with other server activities, supporting events and goals that align with the community's interests. This fosters a collaborative environment where economic achievements contribute to overall community success.
 
 By effectively simulating an intricate economic environment while providing entertainment, education, and engagement, this Discord economy bot stands out as the epitome of realism and interactivity. It serves as a valuable tool for any server
+
+# Bot Code
+
+## Formating
+
+- Folder & File name should be in `flatcase`
+
+- Non-const variables should be in `snake_case`
+
+- Const variables should be in `MACRO_CASE`
+
+- Class names should be in `PascalCase`
+
+- Any lists or directories should be in `camelCase`
