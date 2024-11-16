@@ -49,13 +49,15 @@ ShadowStocks on a time scale. Every action in our bot is on the scale below:
 
 - `1 Minute` = 1 Second
 - `1 Hour` = 1 Minute
-- `1 Day` = 1 Hour
+- `1 Day` = 24 Minutes
 
 ## Formating
 
 - Folder & File name should be in `flatcase`
 
 - Non-const variables should be in `snake_case`
+
+- Profile attributes should be in `flatcase`
 
 - Const variables should be in `MACRO_CASE`
 
