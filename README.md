@@ -39,7 +39,15 @@ Discord, a popular platform for communities to gather and communicate, has seen 
 
 By effectively simulating an intricate economic environment while providing entertainment, education, and engagement, this Discord economy bot stands out as the epitome of realism and interactivity. It serves as a valuable tool for any server
 
-# Bot Code
+## Bot Features
+
+### Time Scale
+
+ShadowStocks on a time scale. Every action in our bot is on the scale below:
+
+- `1 Minute` = 1 Second
+- `1 Hour` = 1 Minute
+- `1 Day` = 1 Hour
 
 ## Formating
 
@@ -52,3 +60,7 @@ By effectively simulating an intricate economic environment while providing ente
 - Class names should be in `PascalCase`
 
 - Any lists or directories should be in `camelCase`
+
+- Color Hexes in `constants.py` should be in `PascalCase`
+
+- Function/Def names should be in `snake_case` and describe the use
