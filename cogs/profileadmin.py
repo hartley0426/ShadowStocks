@@ -9,6 +9,8 @@ import aiosqlite
 import constants
 from utilities import utils
 from utilities.embeds import basicEmbeds
+from jobutilities import attributes, jobs
+
 
 class ProfileAdmin(commands.Cog):
     def __init__(self, bot):
@@ -55,12 +57,31 @@ class ProfileAdmin(commands.Cog):
                             height = utils.to_height(random.randint(40,80)) 
                             cash = 1500 if difficulty.value == 1 else (1000 if difficulty.value == 2 else (500 if difficulty.value == 3 else 0))
                             bank = 0 
+
+                            occupation = "unemployed"
+                            moneylastcollected = "never"
+
+                            strength_level = 20.0 if difficulty.value == 1 else (15.0 if difficulty.value == 2 else (10.0 if difficulty.value == 3 else 5.0))
+                            dexterity_level  = 20.0 if difficulty.value == 1 else (15.0 if difficulty.value == 2 else (10.0 if difficulty.value == 3 else 5.0))
+                            intelligence_level  = 20.0 if difficulty.value == 1 else (15.0 if difficulty.value == 2 else (10.0 if difficulty.value == 3 else 5.0))
+                            charisma_level  = 20.0 if difficulty.value == 1 else (15.0 if difficulty.value == 2 else (10.0 if difficulty.value == 3 else 5.0))
+                            wisdom_level  = 20.0 if difficulty.value == 1 else (15.0 if difficulty.value == 2 else (10.0 if difficulty.value == 3 else 5.0))
+
+                            basic_attributes = {
+                                "strength": attributes.Attribute(level=strength_level, minimum=0.0, maximum=100.0).to_dict(),
+                                "dexterity": attributes.Attribute(level=dexterity_level, minimum=0.0, maximum=100.0).to_dict(),
+                                "intelligence": attributes.Attribute(level=intelligence_level, minimum=0.0, maximum=100.0).to_dict(),
+                                "charisma": attributes.Attribute(level=charisma_level, minimum=0.0, maximum=100.0).to_dict(),
+                                "wisdom": attributes.Attribute(level=wisdom_level, minimum=0.0, maximum=100.0).to_dict()
+                            }
+
                         except Exception as e:
                             print(e)
                         try: 
+                            attributes_json = json.dumps(basic_attributes)
                             await db.execute('''
-                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 ON CONFLICT(guild_id, user_id) DO UPDATE SET
                                     charactername = excluded.charactername,
                                     age = excluded.age,
@@ -68,8 +89,11 @@ class ProfileAdmin(commands.Cog):
                                     difficulty = excluded.difficulty,
                                     height = excluded.height,
                                     cash = excluded.cash,
-                                    bank = excluded.bank
-                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank)) 
+                                    bank = excluded.bank,
+                                    attributes = excluded.attributes,
+                                    occupation = excluded.occupation,
+                                    moneylastcollected = excluded.moneylastcollected
+                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected)) 
                             await db.commit()
                             await interaction.response.send_message(
                                 embed=discord.Embed(description=f"`Successfully created: {charactername}`", colour=constants.colorHexes["Success"]),
@@ -85,13 +109,36 @@ class ProfileAdmin(commands.Cog):
         user_id = user.id
         guild_id = interaction.guild.id
         async with aiosqlite.connect('profiles.db') as db:
-            async with db.execute('''SELECT charactername, age, gender, difficulty, height, cash, bank FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
+            async with db.execute('''SELECT charactername, age, gender, difficulty, height, cash, bank, attributes, occupation FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
                 profile = await cursor.fetchone()
                 if not profile:
                     await interaction.response.send_message(embed=discord.Embed(description="`This user doesn't have a profile`", colour=constants.colorHexes["Danger"]), ephemeral=True)
                     return
                 else:
-                    charactername, age, gender, difficulty, height, cash, bank = profile
+                    charactername, age, gender, difficulty, height, cash, bank, attributes_json, occupation = profile
+                    attributes_data = json.loads(attributes_json) if attributes_json else {}
+
+                    strength_attribute = attributes.Attribute.from_dict(attributes_data.get("strength", {}))
+                    strength_percentage = strength_attribute.GetLevelPercentage()
+
+                    dexterity_attribute = attributes.Attribute.from_dict(attributes_data.get("dexterity", {}))
+                    dexterity_percentage = dexterity_attribute.GetLevelPercentage()
+
+                    intelligence_attribute = attributes.Attribute.from_dict(attributes_data.get("intelligence", {}))
+                    intelligence_percentage = intelligence_attribute.GetLevelPercentage()
+
+                    charisma_attribute = attributes.Attribute.from_dict(attributes_data.get("charisma", {}))
+                    charisma_percentage = charisma_attribute.GetLevelPercentage()
+
+                    wisdom_attribute = attributes.Attribute.from_dict(attributes_data.get("wisdom", {}))
+                    wisdom_percentage = wisdom_attribute.GetLevelPercentage()
+
+                    job_key = occupation
+                    job_object = jobs.Jobs.get(job_key, jobs.Jobs["unemployed"])
+                    job_name = job_object.GetName()
+                    job_desc = job_object.GetDesc()
+                    job_pay = job_object.GetPay()
+                                                                        
                     profile_embed = discord.Embed(
                         title=f"{user.display_name}'s Profile",
                         description=f"**Roleplay Information**\n\n"
@@ -102,7 +149,18 @@ class ProfileAdmin(commands.Cog):
                                     f"**Difficulty:** `{difficulty}`\n\n"
                                     f"**Easy Banking**\n\n"
                                     f"**Cash:** `{utils.to_money(cash)}`\n"
-                                    f"**Bank:** `{utils.to_money(bank)}`",
+                                    f"**Bank:** `{utils.to_money(bank)}`\n\n"
+                                    f"**Attributes**\n\n"
+                                    f"**Strength:** `{strength_percentage}%`\n"
+                                    f"**Dexterity:** `{dexterity_percentage}%`\n"
+                                    f"**Intelligence:** `{intelligence_percentage}%`\n"
+                                    f"**Charisma:** `{charisma_percentage}%`\n"
+                                    f"**Wisdom:** `{wisdom_percentage}%`\n\n"
+                                    f"**Full Time Job**\n\n"
+                                    f"**Job:** `{job_name}`\n"
+                                    f"**Description:** `{job_desc}`\n"
+                                    f"**Job:** `{utils.to_money(job_pay)}`\n",
+                                    
                         colour=constants.colorHexes['MediumBlue']
                     )
 
