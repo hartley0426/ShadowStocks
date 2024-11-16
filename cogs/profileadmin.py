@@ -8,6 +8,7 @@ from datetime import datetime
 import aiosqlite
 import constants
 from utilities import utils
+from utilities.embeds import basicEmbeds
 
 class ProfileAdmin(commands.Cog):
     def __init__(self, bot):
@@ -118,7 +119,7 @@ class ProfileAdmin(commands.Cog):
             async with db.execute('''SELECT charactername FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
                 profile = await cursor.fetchone()
                 if not profile:
-                    await interaction.response.send_message(embed=discord.Embed(description="`You don't have a profile to delete!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                    await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                     return
                 else:
                     await db.execute('''DELETE FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id))
@@ -143,7 +144,7 @@ class ProfileAdmin(commands.Cog):
 
                 if not profile:
                     # Send a response if no profile exists
-                    await interaction.response.send_message(embed=discord.Embed(description="`This user doesn't have a profile.`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                    await interaction.response.send_message(embed=basicEmbeds["OtherNoProfile"], ephemeral=True)
                     return
 
                 # Get the current cash balance
@@ -178,7 +179,7 @@ class ProfileAdmin(commands.Cog):
 
                 if not profile:
                     # Send a response if no profile exists
-                    await interaction.response.send_message(embed=discord.Embed(description="`This user doesn't have a profile.`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                    await interaction.response.send_message(embed=basicEmbeds["OtherNoProfile"], ephemeral=True)
                     return
 
                 # Get the current cash balance
