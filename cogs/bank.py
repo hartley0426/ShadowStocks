@@ -8,6 +8,7 @@ from datetime import datetime
 import aiosqlite
 import constants
 from utilities import utils
+from utilities.embeds import basicEmbeds
 
 class Bank(commands.Cog):
     def __init__(self, bot):
@@ -27,7 +28,7 @@ class Bank(commands.Cog):
                 profile = await cursor.fetchone()
 
                 if not profile:
-                    await interaction.response.send_message(embed=discord.Embed(description="`This user doesn't have a profile!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                    await interaction.response.send_message(embed=basicEmbeds["OtherNoProfile"], ephemeral=True)
                     return
                 
                 charactername, cash, bank = profile
@@ -57,7 +58,7 @@ class Bank(commands.Cog):
                 profile = await cursor.fetchone()
 
                 if not profile:
-                    await interaction.response.send_message(embed=discord.Embed(description="`You do not have a profile! Do /createprofile to begin!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                    await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                     return
                 
                 charactername, cash, bank = profile
@@ -107,7 +108,7 @@ class Bank(commands.Cog):
                 profile = await cursor.fetchone()
 
                 if not profile:
-                    await interaction.response.send_message(embed=discord.Embed(description="`You do not have a profile! Do /createprofile to begin!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                    await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                     return
                 
                 charactername, cash, bank = profile
@@ -165,7 +166,7 @@ class Bank(commands.Cog):
                 payer_profile = await cursor.fetchone()
 
             if not payer_profile:
-                await interaction.response.send_message(embed=discord.Embed(description="`You do not have a profile! Do /createprofile to begin!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                 return
 
             payer_name, payer_cash = payer_profile
@@ -174,7 +175,7 @@ class Bank(commands.Cog):
                 recipient_profile = await cursor.fetchone()
 
             if not recipient_profile:
-                await interaction.response.send_message(embed=discord.Embed(description=f"`{member.display_name} does not have a profile!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                await interaction.response.send_message(embed=basicEmbeds["OtherNoProfile"], ephemeral=True)
                 return
 
             recipient_name, recipient_cash = recipient_profile
@@ -234,7 +235,7 @@ class Bank(commands.Cog):
                 payer_profile = await cursor.fetchone()
 
             if not payer_profile:
-                await interaction.response.send_message(embed=discord.Embed(description="`You do not have a profile! Do /createprofile to begin!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                 return
 
             payer_name, payer_bank = payer_profile
@@ -243,7 +244,7 @@ class Bank(commands.Cog):
                 recipient_profile = await cursor.fetchone()
 
             if not recipient_profile:
-                await interaction.response.send_message(embed=discord.Embed(description=f"`{member.display_name} does not have a profile!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                await interaction.response.send_message(embed=basicEmbeds["OtherNoProfile"], ephemeral=True)
                 return
 
             recipient_name, recipient_bank = recipient_profile
