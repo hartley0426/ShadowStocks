@@ -53,6 +53,19 @@ def to_height(inches: int) -> str:
 
     return ", ".join(result)
 
+def get_time_delta(initial_time : datetime.datetime):
+    """Returns the time delta between the current time and the given time in game time."""
+    time_delta = datetime.datetime.now() - initial_time
+
+    hours, remainder = divmod(time_delta.seconds, 3600) 
+    minutes, seconds = divmod(remainder, 60)
+    
+
+    return {
+        "days": hours,
+        "hours": minutes,
+        "minutes": seconds}
+
 async def set_cash(db, amount, guild_id, user_id):
     await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (amount, guild_id, user_id))
     await db.commit()
