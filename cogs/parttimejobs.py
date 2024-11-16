@@ -4,11 +4,14 @@ from discord import app_commands
 import json
 import os
 import random
-from datetime import datetime 
+from datetime import datetime, timedelta 
 import aiosqlite
 import constants
 from utilities import utils
+from utilities.embeds import basicEmbeds
 from utilities.outcomes import OUTCOMES_WORK
+
+COOLDOWNS = {}
 
 class PartTimeJobs(commands.Cog):
     def __init__(self, bot):
@@ -21,19 +24,38 @@ class PartTimeJobs(commands.Cog):
     
         
     @app_commands.command(name="work", description="Works a random part-time job.")
-    @app_commands.checks.cooldown(1, 42300, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 25200, key=lambda i: (i.guild_id, i.user.id))
     async def work(self, interaction: discord.Interaction):
         guild_id = interaction.guild.id
         user_id = interaction.user.id
+        cooldown_duration = timedelta(hours=7)
+
+        if guild_id not in COOLDOWNS:
+            COOLDOWNS[guild_id] = {}
+
+        if user_id in COOLDOWNS[guild_id]:
+            last_used = COOLDOWNS[guild_id][user_id]
+            if datetime.now() < last_used + cooldown_duration:
+                remaining_time = (last_used + cooldown_duration) - datetime.now()
+                seconds = remaining_time.seconds
+
+                wait_embed = discord.Embed(
+                    description=f"`You are on cooldown! You must wait {utils.convert_seconds(seconds)}`",
+                    colour=constants.colorHexes["Danger"]
+                )
+                await interaction.response.send_message(embed=wait_embed, ephemeral=True)
+                return
 
         async with aiosqlite.connect('profiles.db') as db:
             async with db.execute('''SELECT cash, difficulty FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
                 profile = await cursor.fetchone()
 
                 if not profile:
-                    await interaction.response.send_message(embed=discord.Embed(description="`You do not have a profile! Do /createprofile to begin!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+                    await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                     return
                 
+                COOLDOWNS[guild_id][user_id] = datetime.now()
+
                 cash, difficulty = profile
 
                 difficulty_multiplier = 2.5 if difficulty == "Rich" else (2.0 if difficulty == "Middle Class" else(1.5 if difficulty == "Poor" else 1))
