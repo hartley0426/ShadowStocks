@@ -38,3 +38,29 @@ Discord, a popular platform for communities to gather and communicate, has seen 
 - The bot seamlessly integrates with other server activities, supporting events and goals that align with the community's interests. This fosters a collaborative environment where economic achievements contribute to overall community success.
 
 By effectively simulating an intricate economic environment while providing entertainment, education, and engagement, this Discord economy bot stands out as the epitome of realism and interactivity. It serves as a valuable tool for any server
+
+## Bot Features
+
+### Time Scale
+
+ShadowStocks on a time scale. Every action in our bot is on the scale below:
+
+- `1 Minute` = 1 Second
+- `1 Hour` = 1 Minute
+- `1 Day` = 1 Hour
+
+## Formating
+
+- Folder & File name should be in `flatcase`
+
+- Non-const variables should be in `snake_case`
+
+- Const variables should be in `MACRO_CASE`
+
+- Class names should be in `PascalCase`
+
+- Any lists or directories should be in `camelCase`
+
+- Color Hexes in `constants.py` should be in `PascalCase`
+
+- Function/Def names should be in `snake_case` and describe the use
