@@ -1,5 +1,6 @@
 import os
 import datetime
+import aiosqlite
 
 
 def to_money(amount: float) -> str:
@@ -51,3 +52,7 @@ def to_height(inches: int) -> str:
             result.append(f"{remaining} inch")
 
     return ", ".join(result)
+
+async def set_cash(db, amount, guild_id, user_id):
+    await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (amount, guild_id, user_id))
+    await db.commit()
