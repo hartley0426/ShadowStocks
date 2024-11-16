@@ -29,3 +29,10 @@ OUTCOMES_WORK = [
     "You got a part-time job as an assistant car mechanic and accidentally installed a tire backward.\n\n"
     "You got a part-time job as a substitute teacher and lost control of the classroom in five minutes.\n\n"
     ]
+
+OUTCOMES_BEG = [
+    "You begged for money and a nice old lady gave you",
+    "A kind stranger felt sorry for you and gave you",
+    "You found a few dollar in an old coat pocket while begging, you got",
+    "You sang a song a someone gave you money for your music, they gave you"
+]
