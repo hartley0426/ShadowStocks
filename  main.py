@@ -33,6 +33,9 @@ async def init_db():
                          height TEXT NOT NULL,
                          cash INTEGER NOT NULL,
                          bank INTEGER NOT NULL,
+                         attributes TEXT NOT NULL,
+                         occupation TEXT NOT NULL,
+                         moneylastcollected TEXT NOT NULL,
                          PRIMARY KEY (guild_id, user_id)
                          )
                          ''')
