@@ -1,19 +1,25 @@
-# ShadowStocks
-### The Most Realistic Discord Economy Bot
+<div align="center">
+  <img src="assets/SSB.png" alt="icon" width="1080" height="290">
+  <h3 align="center">The Most Realistic Discord Economy Bot</h3>
+  <h4 align="center">Made with <a href="https://discordpy.readthedocs.io/en/stable/">Discord.py</a></h4>
 
-### • Made with [Discord.py](https://discordpy.readthedocs.io/en/stable/) 
+  <hr>
+
+  [![python badge](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/ "Python")
+
+  [![Generic badge](https://img.shields.io/badge/Python-3.8-blue.svg)](https://www.python.org/)
+  ![Github License](https://img.shields.io/badge/license-MIT-blue)
+  ![Windows](https://img.shields.io/badge/os-windows-yellow)
+  
+  [![SQLite](https://img.shields.io/badge/SQLite-%2307405e.svg?logo=sqlite&logoColor=white)](#)
+  
+</div>
 
 
-[![python badge](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/ "Python")
 
-[![Generic badge](https://img.shields.io/badge/Python-3.8-blue.svg)](https://www.python.org/)
-![Github License](https://img.shields.io/badge/license-MIT-blue)
-![Windows](https://img.shields.io/badge/os-windows-yellow)
-
-[![SQLite](https://img.shields.io/badge/SQLite-%2307405e.svg?logo=sqlite&logoColor=white)](#)
 
 ## About Us
-Discord, a popular platform for communities to gather and communicate, has seen a significant increase in the development of bots to enhance user engagement. Among these, economy bots are particularly notable for their ability to simulate real-world economic systems and provide users with entertaining yet educational experiences. ShadowStocks distinguishes itself through several key features:
+Discord, a popular platform for communities to gather and communicate, has seen a significant increase in the development of bots to enhance user engagement. Among these, economy bots are particularly notable for their ability to simulate real-world economic systems and provide users with entertaining yet educational experiences. We distinguish ourselves through several key features:
 
 **Complex Economic Simulation:**
 
