@@ -7,8 +7,9 @@ import random
 from datetime import datetime 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
+
 
 class Bank(commands.Cog):
     def __init__(self, bot):
@@ -94,6 +95,8 @@ class Bank(commands.Cog):
                 await db.execute('''UPDATE profiles SET cash = ?, bank = ? WHERE guild_id = ? AND user_id = ?''', (final_cash, final_bank, guild_id, user_id))
                 await db.commit()
 
+                await logs.send_player_log(self.bot, "Deposit", f"Deposited {utils.to_money(amount)}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
+
                 await interaction.response.send_message(embed=deposit_embed)
 
 
@@ -143,6 +146,8 @@ class Bank(commands.Cog):
 
                 await db.execute('''UPDATE profiles SET cash = ?, bank = ? WHERE guild_id = ? AND user_id = ?''', (final_cash, final_bank, guild_id, user_id))
                 await db.commit()
+
+                await logs.send_player_log(self.bot, "Withdraw", f"Withdrew {utils.to_money(amount)}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
                 await interaction.response.send_message(embed=deposit_embed)
 
@@ -202,6 +207,8 @@ class Bank(commands.Cog):
             await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (final_payer_cash, guild_id, payer_id))
             await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (final_recipient_cash, guild_id, recipient_id))
             await db.commit()
+
+            await logs.send_player_log(self.bot, "Pay", f"Paid {utils.to_money(amount)} to", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, member)
 
             pay_embed = discord.Embed(
                 title="Pay Transaction Completed",
@@ -271,6 +278,8 @@ class Bank(commands.Cog):
             await db.execute('''UPDATE profiles SET bank = ? WHERE guild_id = ? AND user_id = ?''', (final_payer_bank, guild_id, payer_id))
             await db.execute('''UPDATE profiles SET bank = ? WHERE guild_id = ? AND user_id = ?''', (final_recipient_bank, guild_id, recipient_id))
             await db.commit()
+
+            await logs.send_player_log(self.bot, "Transfer", f"Transfered {utils.to_money(amount)} to", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, member)
 
             pay_embed = discord.Embed(
                 title="Pay Transaction Completed",

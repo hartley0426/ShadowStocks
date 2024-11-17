@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 
 SIDES = ['Heads', 'Tails']
@@ -74,7 +74,7 @@ class SmallGambling(commands.Cog):
                         description=f"{charactername} has won the coinflip for `{utils.to_money(2*bet)}`",
                         colour=constants.colorHexes["SkyBlue"]
                     )
-
+                    await logs.send_player_log(self.bot, 'Coinflip', f"Won {bet}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                     win_embed.set_thumbnail(url=avatar_url)
 
                     await interaction.response.send_message(embed=win_embed)
@@ -85,7 +85,7 @@ class SmallGambling(commands.Cog):
                         description=f"{charactername} has lost the coinflip for `{utils.to_money(bet)}`",
                         colour=constants.colorHexes["DarkBlue"]
                     )
-
+                    await logs.send_player_log(self.bot, 'Coinflip', f"Lost", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                     lose_embed.set_thumbnail(url=avatar_url)
 
                     await interaction.response.send_message(embed=lose_embed)

@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 from utilities.outcomes import OUTCOMES_WORK
 
@@ -78,7 +78,7 @@ class PartTimeJobs(commands.Cog):
                                 f"**Difficulty Multiplier:** `{difficulty_multiplier}x`\n\n"
                                 f"**Final Total:** `{utils.to_money(final_income)}`"
                 )
-
+                await logs.send_player_log(self.bot, 'Collection', f"Worked Part-time Job. Received {utils.to_money(final_income)} ", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                 await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, guild_id, user_id))
                 await db.commit()
 

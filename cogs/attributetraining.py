@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 from jobutilities import attributes
 
@@ -44,6 +44,7 @@ class AttributeTraining(commands.Cog):
 
                     await db.execute('''UPDATE profiles SET attributes = ? WHERE guild_id = ? AND user_id = ?''',(updated_attributes_json, guild_id, user_id))
                     await db.commit()
+                    await logs.send_player_log(self.bot, 'Workout', f"Worked out", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                     await interaction.response.send_message(embed=discord.Embed(description=f"`You did a workout and gained .25 strength | Total: {strength_attribute.GetLevel()}%`", colour=constants.colorHexes["LightBlue"]))
                 else:
                     await interaction.response.send_message(embed=discord.Embed(description=f"`Your strength is already at the maximum level!`", colour=constants.colorHexes["LightBlue"]))
@@ -73,6 +74,7 @@ class AttributeTraining(commands.Cog):
 
                     await db.execute('''UPDATE profiles SET attributes = ? WHERE guild_id = ? AND user_id = ?''',(updated_attributes_json, guild_id, user_id))
                     await db.commit()
+                    await logs.send_player_log(self.bot, 'Studied', f"Studied", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                     await interaction.response.send_message(embed=discord.Embed(description=f"`You did a study session and gained .25 intelligence | Total: {intelligence_attribute.GetLevel()}%`", colour=constants.colorHexes["LightBlue"]))
                 else:
                     await interaction.response.send_message(embed=discord.Embed(description=f"`Your intelligence is already at the maximum level!`", colour=constants.colorHexes["LightBlue"]))
@@ -103,6 +105,7 @@ class AttributeTraining(commands.Cog):
                     await db.execute('''UPDATE profiles SET attributes = ? WHERE guild_id = ? AND user_id = ?''',(updated_attributes_json, guild_id, user_id))
                     await db.commit()
                     await interaction.response.send_message(embed=discord.Embed(description=f"`You painted a work of art and gained .25 dexterity | Total: {dexterity_attribute.GetLevel()}%`", colour=constants.colorHexes["LightBlue"]))
+                    await logs.send_player_log(self.bot, 'Paint', f"Painted", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                 else:
                     await interaction.response.send_message(embed=discord.Embed(description=f"`Your dexterity is already at the maximum level!`", colour=constants.colorHexes["LightBlue"]))
 
@@ -132,6 +135,7 @@ class AttributeTraining(commands.Cog):
                     await db.execute('''UPDATE profiles SET attributes = ? WHERE guild_id = ? AND user_id = ?''',(updated_attributes_json, guild_id, user_id))
                     await db.commit()
                     await interaction.response.send_message(embed=discord.Embed(description=f"`You spoke and gained .25 charisma | Total: {charisma_attribute.GetLevel()}%`", colour=constants.colorHexes["LightBlue"]))
+                    await logs.send_player_log(self.bot, 'Socialize', f"Socialized", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                 else:
                     await interaction.response.send_message(embed=discord.Embed(description=f"`Your charisma is already at the maximum level!`", colour=constants.colorHexes["LightBlue"]))
 
@@ -160,6 +164,7 @@ class AttributeTraining(commands.Cog):
 
                     await db.execute('''UPDATE profiles SET attributes = ? WHERE guild_id = ? AND user_id = ?''',(updated_attributes_json, guild_id, user_id))
                     await db.commit()
+                    await logs.send_player_log(self.bot, 'Meditate', f"Meditated", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                     await interaction.response.send_message(embed=discord.Embed(description=f"`You meditated and gained .25 wisdom | Total: {wisdom_attribute.GetLevel()}%`", colour=constants.colorHexes["LightBlue"]))
                 else:
                     await interaction.response.send_message(embed=discord.Embed(description=f"`Your wisdom is already at the maximum level!`", colour=constants.colorHexes["LightBlue"]))

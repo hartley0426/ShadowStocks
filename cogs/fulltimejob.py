@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 from jobutilities import jobs
 
@@ -49,6 +49,7 @@ class cogname(commands.Cog):
                             description=f"{charactername} has collected `{utils.to_money(job_pay)}`."
                         )
                         await interaction.response.send_message(embed=embed)
+                        await logs.send_player_log(self.bot, 'Collection', f"Collected hourly pay for first time. Received {utils.to_money(job_pay)} ", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                     except Exception as e:
                         print(e)
 
@@ -69,7 +70,7 @@ class cogname(commands.Cog):
                             new_moneylastcollected = datetime.now().isoformat()
                             await db.execute('''UPDATE profiles SET bank = ?, moneylastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_bank, new_moneylastcollected, guild_id, user_id))
                             await db.commit()
-
+                            await logs.send_player_log(self.bot, 'Collection', f"Collected hourly pay after {time_since_collect['hours']}. Received {utils.to_money(paycheck)} ", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         except Exception as e:
                             print(e)
 

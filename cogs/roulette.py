@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 
 RED_NUMBERS = {1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36}
@@ -110,7 +110,7 @@ class Roulette(commands.Cog):
                                             f"**Choice Picked:** `{choice.name}\n`"
                                             f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                                 )
-
+                            await logs.send_player_log(self.bot, 'Roulette', f"Won {payout}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                             embed.set_footer(text=f"{interaction.user} has won ${payout}")
                             await interaction.response.send_message(embed=embed)
 
@@ -123,7 +123,7 @@ class Roulette(commands.Cog):
                                             f"**Choice Picked:** `{choice.name}\n`"
                                             f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                             )
-
+                            await logs.send_player_log(self.bot, 'Roulette', f"Lost", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                             embed.set_footer(text=f"{interaction.user} lost.")
                             await interaction.response.send_message(embed=embed)
 
@@ -140,7 +140,7 @@ class Roulette(commands.Cog):
                                             f"**Choice Picked:** `{choice.name}\n`"
                                             f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                             )
-
+                            await logs.send_player_log(self.bot, 'Roulette', f"Won {payout}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                             embed.set_footer(text=f"{interaction.user} has won ${payout}")
                             await interaction.response.send_message(embed=embed)
                         else:
@@ -152,7 +152,7 @@ class Roulette(commands.Cog):
                                             f"**Choice Picked:** `{choice.name}\n`"
                                             f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                             )
-
+                            await logs.send_player_log(self.bot, 'Roulette', f"Lost", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                             embed.set_footer(text=f"{interaction.user} lost.")
                             await interaction.response.send_message(embed=embed)
 
@@ -169,7 +169,7 @@ class Roulette(commands.Cog):
                                         f"**Choice Picked:** `{choice.name}\n`"
                                         f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                         )
-
+                        await logs.send_player_log(self.bot, 'Roulette', f"Won {payout}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         embed.set_footer(text=f"{interaction.user} has won ${payout}")
                         await interaction.response.send_message(embed=embed)
                     else:
@@ -181,7 +181,7 @@ class Roulette(commands.Cog):
                                         f"**Choice Picked:** `{choice.name}\n`"
                                         f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                         )
-
+                        await logs.send_player_log(self.bot, 'Roulette', f"Lost", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         embed.set_footer(text=f"{interaction.user} lost.")
                         await interaction.response.send_message(embed=embed)
 
@@ -198,7 +198,7 @@ class Roulette(commands.Cog):
                                         f"**Choice Picked:** `{choice.name}\n`"
                                         f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                         )
-
+                        await logs.send_player_log(self.bot, 'Roulette', f"Won {payout}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         embed.set_footer(text=f"{interaction.user} has won ${payout}")
                         await interaction.response.send_message(embed=embed)
                     else:
@@ -210,7 +210,7 @@ class Roulette(commands.Cog):
                                         f"**Choice Picked:** `{choice.name}\n`"
                                         f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                         )
-
+                        await logs.send_player_log(self.bot, 'Roulette', f"Lost", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         embed.set_footer(text=f"{interaction.user} lost.")
                         await interaction.response.send_message(embed=embed)
 
@@ -233,7 +233,7 @@ class Roulette(commands.Cog):
                                         f"**Choice Picked:** `{choice.name}\n`"
                                         f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                         )
-
+                        await logs.send_player_log(self.bot, 'Roulette', f"Won {payout}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         embed.set_footer(text=f"{interaction.user} has won ${payout}")
                         await interaction.response.send_message(embed=embed)
                     else:
@@ -245,7 +245,7 @@ class Roulette(commands.Cog):
                                         f"**Choice Picked:** `{choice.name}\n`"
                                         f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                         )
-
+                        await logs.send_player_log(self.bot, 'Roulette', f"Lost", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         embed.set_footer(text=f"{interaction.user} lost.")
                         await interaction.response.send_message(embed=embed)
 
@@ -268,7 +268,7 @@ class Roulette(commands.Cog):
                                         f"**Choice Picked:** `{choice.name}\n`"
                                         f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                         )
-
+                        await logs.send_player_log(self.bot, 'Roulette', f"Won {payout}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         embed.set_footer(text=f"{interaction.user} has won ${payout}")
                         await interaction.response.send_message(embed=embed)
                     else:
@@ -280,7 +280,7 @@ class Roulette(commands.Cog):
                                         f"**Choice Picked:** `{choice.name}\n`"
                                         f"**Number Rolled:** `{number_color.capitalize()} {rolled_number} | {number_parity.capitalize()}`"
                         )
-
+                        await logs.send_player_log(self.bot, 'Roulette', f"Lost", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         embed.set_footer(text=f"{interaction.user} lost.")
                         await interaction.response.send_message(embed=embed)
 

@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 import asyncio
 
@@ -80,7 +80,7 @@ class BlackjackView(discord.ui.View):
             )
 
             embed.add_field(name="Result", value="Busted! You Lose", inline=False)
-
+            await logs.send_player_log(self.bot, 'Lost Blackjack', f"Busted", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
             del games[self.user_id]
             await interaction.response.edit_message(embed=embed)
 
@@ -95,6 +95,7 @@ class BlackjackView(discord.ui.View):
                 colour=constants.colorHexes["SkyBlue"]
             )
             embed.add_field(name="Result", value=f"You got 21! you win {utils.to_money(2*self.bet)}", inline=False)
+            await logs.send_player_log(self.bot, 'Won Blackjack', f"Got 21", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
             await interaction.response.edit_message(embed=embed)
 
@@ -148,7 +149,7 @@ class BlackjackView(discord.ui.View):
             await db.commit()
 
             result_embed.add_field(name="Result", value=f"Dealer Busts! You win {utils.to_money(2*self.bet)}", inline=False)
-
+            await logs.send_player_log(self.bot, 'Won Blackjack', f"Dealer Bust", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
             del games[self.user_id]
 
         elif dealer_total == player_total:
@@ -157,11 +158,13 @@ class BlackjackView(discord.ui.View):
             await db.commit()
 
             result_embed.add_field(name="Result", value=f"Dealer Tie! You win {utils.to_money(self.bet)}", inline=False)
+            await logs.send_player_log(self.bot, 'Won Blackjack', f"Dealer Tied", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
             del games[self.user_id]
 
         elif dealer_total > player_total:
             result_embed.add_field(name="Result", value=f"Dealer Wins!", inline=False)
+            await logs.send_player_log(self.bot, 'Lost Blackjack', f"Dealer Won", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
             del games[self.user_id]
 
@@ -169,6 +172,7 @@ class BlackjackView(discord.ui.View):
             new_cash = self.cash + (2*self.bet)
             await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, interaction.guild.id, self.user_id))
             await db.commit()
+            await logs.send_player_log(self.bot, 'Won Blackjack', f"Beat Dealer", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
             result_embed.add_field(name="Result", value=f"You Won! You win {utils.to_money(2 * self.bet)}", inline=False)
 
@@ -242,6 +246,7 @@ class Blackjack(commands.Cog):
                 game_message = self.game_message
 
                 view = BlackjackView(user_id, game_message, deck, bet, db, cursor, cash)
+                await logs.send_player_log(self.bot, 'Began Blackjack', f"Began Blackjack", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
                 await interaction.response.send_message(embed=game_message, view=view)
 

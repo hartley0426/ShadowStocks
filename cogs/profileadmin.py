@@ -7,7 +7,7 @@ import random
 from datetime import datetime 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 from jobutilities import attributes, jobs
 
@@ -99,6 +99,9 @@ class ProfileAdmin(commands.Cog):
                                 embed=discord.Embed(description=f"`Successfully created: {charactername}`", colour=constants.colorHexes["Success"]),
                                 ephemeral=True
                             )
+
+                            await logs.send_player_log(self.bot, 'Profile Creation', f"Created Profile with name of {charactername} | Difficulty: {difficulty.name} ", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
+
                         except Exception as e:
                             print(f"Unexpected error during profile creation: {e}")
             except Exception as e:
@@ -182,6 +185,7 @@ class ProfileAdmin(commands.Cog):
                 else:
                     await db.execute('''DELETE FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id))
                     await db.commit()
+                    await logs.send_player_log(self.bot, 'Profile Creation', f"Deleted their profile", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                     await interaction.response.send_message(embed=discord.Embed(description="`Profile deleted successfully.`", colour=constants.colorHexes["Success"]), ephemeral=True)
         
     @app_commands.command(name="addmoney", description="Adds money to a profile.")
@@ -214,7 +218,7 @@ class ProfileAdmin(commands.Cog):
                 # Update the user's cash balance in the database
                 await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, guild_id, user_id))
                 await db.commit()
-
+                await logs.send_player_log(self.bot, 'Money Addition', f"Gave ${amount}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, user)
                 # Send a confirmation response
                 await interaction.response.send_message(embed=discord.Embed(description=f"`{utils.to_money(amount)} has been added to {user.display_name}'s balance. New balance: {utils.to_money(new_cash)}`", colour=constants.colorHexes["Success"]), ephemeral=True)
                 
@@ -249,7 +253,7 @@ class ProfileAdmin(commands.Cog):
                 # Update the user's cash balance in the database
                 await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, guild_id, user_id))
                 await db.commit()
-
+                await logs.send_player_log(self.bot, 'Money Removal', f"Removed ${amount}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, user)
                 # Send a confirmation response
                 await interaction.response.send_message(embed=discord.Embed(description=f"`{utils.to_money(amount)} has been removed {user.display_name}'s balance. New balance: {utils.to_money(new_cash)}`", colour=constants.colorHexes["Success"]), ephemeral=True)
 

@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 from utilities.outcomes import OUTCOMES_BEG
 
@@ -66,6 +66,7 @@ class Beg(commands.Cog):
 
                 await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (final_cash, guild_id, user_id))
                 await db.commit()
+                await logs.send_player_log(self.bot, 'Begged', f"Begged and recieved {utils.to_money(payment)}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
                 COOLDOWNS[guild_id][user_id] = datetime.now()
 

@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 from jobutilities import jobs, attributes
 
@@ -67,6 +67,7 @@ class ConfirmButton(discord.ui.View):
                 description=f"Successfully applied for `{applied_job.name}`. You are now paid `{utils.to_money(applied_job.pay)}` per hour.",
                 colour=constants.colorHexes["DarkBlue"]
             )
+            await logs.send_player_log(self.bot, 'Application', f"Successfully applied for {applied_job.name}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
             await interaction.response.send_message(embed=embed)
 
         except Exception as e:

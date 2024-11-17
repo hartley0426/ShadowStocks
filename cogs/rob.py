@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 
 COOLDOWNS = {}
@@ -102,6 +102,7 @@ class Rob(commands.Cog):
                                 f"**Your Final Cash:** `{utils.to_money(final_robber_cash)}`",
                     colour=constants.colorHexes["DarkBlue"]
                 )
+                await logs.send_player_log(self.bot, 'Robbery', f"Failed and paid ${fine} to", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, member)
 
                 await interaction.response.send_message(embed=fail_embed)
 
@@ -131,6 +132,7 @@ class Rob(commands.Cog):
                                 f"**Your Final Cash:** `{utils.to_money(final_robber_cash)}`",
                     colour=constants.colorHexes["MediumBlue"]
                 )
+                await logs.send_player_log(self.bot, 'Robbery', f"Success and stole ${stolen} from", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, member)
 
                 await interaction.response.send_message(embed=success_embed)
 

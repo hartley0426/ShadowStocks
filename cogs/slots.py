@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 
 SYMBOL_LIST = [
@@ -73,6 +73,7 @@ class Slots(commands.Cog):
                         description=f"You won `{utils.to_money(winnings)}`",
                         colour=constants.colorHexes["LightBlue"]
                     )
+                    await logs.send_player_log(self.bot, 'Slots', f"Won {bet}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
 
                 if not win:
@@ -82,6 +83,7 @@ class Slots(commands.Cog):
                         description=f"You lost `{utils.to_money(losings)}`",
                         colour=constants.colorHexes["LightBlue"]
                     )
+                    await logs.send_player_log(self.bot, 'Slots', f"Lost", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
 
                 try:

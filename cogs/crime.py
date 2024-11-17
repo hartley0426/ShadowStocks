@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timedelta 
 import aiosqlite
 import constants
-from utilities import utils
+from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 
 COOLDOWNS = {}
@@ -80,6 +80,7 @@ class Crime(commands.Cog):
                                     f"**Cash Total:** `{utils.to_money(new_cash)}`",
                         colour=constants.colorHexes["DarkBlue"]
                     )
+                    await logs.send_player_log(self.bot, 'Crime', f"Failed Crime", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
                     await interaction.response.send_message(embed=failed_embed)
                 
@@ -104,6 +105,7 @@ class Crime(commands.Cog):
                                     f"**Cash Total:** `{utils.to_money(new_cash)}`",
                         colour=constants.colorHexes["SkyBlue"]
                     )
+                    await logs.send_player_log(self.bot, 'Crime', f"Successful Heist", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
                     await interaction.response.send_message(embed=payment_embed)
 
@@ -119,8 +121,10 @@ class Crime(commands.Cog):
                     await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, guild_id, user_id))
                     await db.commit()
 
+                    await logs.send_player_log(self.bot, 'Crime', f"Successful Crime", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
+
                     payment_embed = discord.Embed(
-                        title="Heist Completed!",
+                        title="Crime Completed!",
                         description=f"You have made it out succesfully!\n\n"
                                     f"**Difficulty:** `{difficulty}`\n"
                                     f"**Difficulty Multiplier:** `{difficulty_multiplier}x`\n\n"

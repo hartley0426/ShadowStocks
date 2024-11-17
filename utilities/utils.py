@@ -1,6 +1,9 @@
 import os
 import datetime
 import aiosqlite
+import json
+
+CONFIG_FILE_PATH = 'settings.json'
 
 
 def to_money(amount: float) -> str:
@@ -69,3 +72,8 @@ def get_time_delta(initial_time : datetime.datetime):
 async def set_cash(db, amount, guild_id, user_id):
     await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (amount, guild_id, user_id))
     await db.commit()
+
+def get_config(guild_id, key):
+    with open(CONFIG_FILE_PATH, 'r') as f:
+        data = json.load(f)
+    return data.get(str(guild_id), {}).get(key, None)
