@@ -196,6 +196,11 @@ class ProfileAdmin(commands.Cog):
     async def addmoney(self, interaction: discord.Interaction, user: discord.Member, amount: int):
         user_id = user.id
         guild_id = interaction.guild.id
+
+        moderator_id = utils.get_config(guild_id, "moderator_role_id")
+        if not user.get_role(moderator_id):
+            await interaction.response.send_message(embed=basicEmbeds["SelfNoPermission"], ephemeral=True)
+            return
         
         # Ensure the amount is positive
         if amount < 0:
@@ -223,7 +228,7 @@ class ProfileAdmin(commands.Cog):
                 await db.commit()
                 await logs.send_player_log(self.bot, 'Money Addition', f"Gave ${amount}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, user)
                 # Send a confirmation response
-                await interaction.response.send_message(embed=discord.Embed(description=f"`{utils.to_money(amount)} has been added to {user.display_name}'s balance. New balance: {utils.to_money(new_cash)}`", colour=constants.colorHexes["Success"]), ephemeral=True)
+                await interaction.response.send_message(embed=discord.Embed(description=f"`{utils.to_money(amount)} has been added to {user.display_name}'s balance.`\n\n **New balance:** `{utils.to_money(new_cash)}`", colour=constants.colorHexes["Success"]), ephemeral=True)
                 
     
     @app_commands.command(name="removemoney", description="Removes money from a profile.")
@@ -231,6 +236,11 @@ class ProfileAdmin(commands.Cog):
     async def removemoney(self, interaction: discord.Interaction, user: discord.Member, amount: int):
         user_id = user.id
         guild_id = interaction.guild.id
+
+        moderator_id = utils.get_config(guild_id, "moderator_role_id")
+        if not user.get_role(moderator_id):
+            await interaction.response.send_message(embed=basicEmbeds["SelfNoPermission"], ephemeral=True)
+            return
         
         # Ensure the amount is positive
         if amount < 0:
@@ -258,7 +268,7 @@ class ProfileAdmin(commands.Cog):
                 await db.commit()
                 await logs.send_player_log(self.bot, 'Money Removal', f"Removed ${amount}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, user)
                 # Send a confirmation response
-                await interaction.response.send_message(embed=discord.Embed(description=f"`{utils.to_money(amount)} has been removed {user.display_name}'s balance. New balance: {utils.to_money(new_cash)}`", colour=constants.colorHexes["Success"]), ephemeral=True)
+                await interaction.response.send_message(embed=discord.Embed(description=f"`{utils.to_money(amount)} has been removed {user.display_name}'s balance.`\n\n **New balance:** `{utils.to_money(new_cash)}`", colour=constants.colorHexes["Success"]), ephemeral=True)
 
 
     

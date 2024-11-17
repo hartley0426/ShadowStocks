@@ -22,6 +22,11 @@ class MarketCog(commands.Cog):
     async def addmarket(self, interaction: discord.Interaction, name: str, cost: int, description: str):
         guild_id = str(interaction.guild.id)
 
+        moderator_id = utils.get_config(guild_id, "moderator_role_id")
+        if not interaction.user.get_role(moderator_id):
+            await interaction.response.send_message(embed=basicEmbeds["SelfNoPermission"], ephemeral=True)
+            return
+
         with open(ASSETS_FOR_PURCHASE, "r") as f:
             market_data = json.load(f)
 
@@ -44,6 +49,11 @@ class MarketCog(commands.Cog):
     @app_commands.command(name="removemarket", description="Removes an asset from the market.")
     async def removemarket(self, interaction: discord.Interaction, name: str):
         guild_id = str(interaction.guild.id)
+
+        moderator_id = utils.get_config(guild_id, "moderator_role_id")
+        if not interaction.user.get_role(moderator_id):
+            await interaction.response.send_message(embed=basicEmbeds["SelfNoPermission"], ephemeral=True)
+            return
 
         with open(ASSETS_FOR_PURCHASE, "r") as f:
             market_data = json.load(f)

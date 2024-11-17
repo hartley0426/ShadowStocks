@@ -10,7 +10,50 @@ import constants
 from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 
-CONFIG_FILE_PATH = 'json\settings.json'
+CONFIG_FILE_PATH = 'json/settings.json'
+
+class RoleView(discord.ui.View):
+    def __init__(self, guild_id):
+        super().__init__()
+        self.add_item(RoleDropdown(guild_id))
+
+class RoleDropdown(discord.ui.Select):
+    def __init__(self, guild_id):
+            options = [
+                discord.SelectOption(label="Set Moderator Role ID", value="moderator_role_id")
+            ]
+            super().__init__(placeholder = "Select an Option", min_values = 1, max_values = 1, options=options)
+            self.guild_id = guild_id
+
+    async def callback(self, interaction: discord.Interaction):
+        selected_value = self.values[0] if self.values else None
+        if self.values[0] == 'moderator_role_id':
+            await interaction.response.send_modal(RoleModal(self.guild_id, selected_value))
+            
+
+class RoleModal(discord.ui.Modal, title="Role Configuration"):
+    role_id = discord.ui.TextInput(label="ID", placeholder="The ID you'd like to enter", required=True)
+
+    def __init__(self, guild_id, values):
+        super().__init__()
+        self.guild_id =  guild_id
+        self.values = values
+
+    async def on_submit(self, interaction: discord.Interaction) :
+        with open(CONFIG_FILE_PATH, mode="r") as config_file:
+            data = json.load(config_file)
+
+        if str(self.guild_id) not in data:
+            data[str(self.guild_id)] = {}
+
+        selected = self.values
+
+        data[str(self.guild_id)][selected] = int(self.role_id.value)
+
+        with open(CONFIG_FILE_PATH, mode="w") as config_file:
+            json.dump(data, config_file, indent=4)
+
+        await interaction.response.send_message(embed=discord.Embed(description=f"Role ID set to `{self.role_id}`", colour=constants.colorHexes["SkyBlue"]), ephemeral=True)
 
 class ChannelView(discord.ui.View):
     def __init__(self, guild_id):
@@ -58,7 +101,8 @@ class ChannelModal(discord.ui.Modal, title="Channel Configuration"):
 class ConfigDropdown(discord.ui.Select):
     def __init__(self, guild_id):
         options = [
-            discord.SelectOption(label="Channel ID Configuration", value="channelidconfig")
+            discord.SelectOption(label="Channel ID Configuration", value="channelidconfig"),
+            discord.SelectOption(label="Role ID Configuration", value="roleidconfig")
         ]
         super().__init__(placeholder = "Select an Option", min_values = 1, max_values = 1, options=options)
         self.guild_id = guild_id
@@ -68,6 +112,15 @@ class ConfigDropdown(discord.ui.Select):
             view = ChannelView(self.guild_id)
             embed = discord.Embed(
                 title='Channel Configuration Menu',
+                description='Please select an option to configure!',
+                colour=constants.colorHexes["SkyBlue"]
+            )
+            await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+            return
+        if self.values[0] == 'roleidconfig':
+            view = RoleView(self.guild_id)
+            embed = discord.Embed(
+                title='Role Configuration Menu',
                 description='Please select an option to configure!',
                 colour=constants.colorHexes["SkyBlue"]
             )
@@ -101,7 +154,8 @@ class Config(commands.Cog):
 
         if guild_id not in data: # Defaults
             data[guild_id] = {
-                'log_channel_id': None
+                'log_channel_id': None,
+                'moderator_role_id': None
             }
 
         with open(CONFIG_FILE_PATH, mode="w") as config_file:
