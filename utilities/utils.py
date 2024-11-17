@@ -3,7 +3,7 @@ import datetime
 import aiosqlite
 import json
 
-CONFIG_FILE_PATH = 'settings.json'
+CONFIG_FILE_PATH = 'json\settings.json'
 
 
 def to_money(amount: float) -> str:

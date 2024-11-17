@@ -10,7 +10,7 @@ import constants
 from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 
-CONFIG_FILE_PATH = 'settings.json'
+CONFIG_FILE_PATH = 'json\settings.json'
 
 class ChannelView(discord.ui.View):
     def __init__(self, guild_id):
