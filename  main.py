@@ -36,6 +36,7 @@ async def init_db():
                          attributes TEXT NOT NULL,
                          occupation TEXT NOT NULL,
                          moneylastcollected TEXT NOT NULL,
+                         items TEXT NOT NULL,
                          PRIMARY KEY (guild_id, user_id)
                          )
                          ''')
@@ -81,4 +82,4 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-asyncio.run(main()) 
+asyncio.run(main())
