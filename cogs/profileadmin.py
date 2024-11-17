@@ -74,14 +74,17 @@ class ProfileAdmin(commands.Cog):
                                 "charisma": attributes.Attribute(level=charisma_level, minimum=0.0, maximum=100.0).to_dict(),
                                 "wisdom": attributes.Attribute(level=wisdom_level, minimum=0.0, maximum=100.0).to_dict()
                             }
+                            
+                            items = {}
 
                         except Exception as e:
                             print(e)
                         try: 
                             attributes_json = json.dumps(basic_attributes)
+                            items_json = json.dumps(items)
                             await db.execute('''
-                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 ON CONFLICT(guild_id, user_id) DO UPDATE SET
                                     charactername = excluded.charactername,
                                     age = excluded.age,
@@ -93,7 +96,7 @@ class ProfileAdmin(commands.Cog):
                                     attributes = excluded.attributes,
                                     occupation = excluded.occupation,
                                     moneylastcollected = excluded.moneylastcollected
-                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected)) 
+                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json)) 
                             await db.commit()
                             await interaction.response.send_message(
                                 embed=discord.Embed(description=f"`Successfully created: {charactername}`", colour=constants.colorHexes["Success"]),
