@@ -12,6 +12,8 @@
   ![Windows](https://img.shields.io/badge/os-windows-yellow)
   
   [![SQLite](https://img.shields.io/badge/SQLite-%2307405e.svg?logo=sqlite&logoColor=white)](#)
+  [![JSON](https://img.shields.io/badge/JSON-000?logo=json&logoColor=fff)](#)
+  [![Visual Studio](https://custom-icon-badges.demolab.com/badge/Visual%20Studio-5C2D91.svg?&logo=visual-studio&logoColor=white)](#)
   
 </div>
 
