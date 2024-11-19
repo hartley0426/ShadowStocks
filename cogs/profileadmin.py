@@ -76,15 +76,17 @@ class ProfileAdmin(commands.Cog):
                             }
                             
                             items = {}
+                            education = {}
 
                         except Exception as e:
                             print(e)
                         try: 
                             attributes_json = json.dumps(basic_attributes)
                             items_json = json.dumps(items)
+                            education_json = json.dumps(education)
                             await db.execute('''
-                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items, education)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 ON CONFLICT(guild_id, user_id) DO UPDATE SET
                                     charactername = excluded.charactername,
                                     age = excluded.age,
@@ -95,8 +97,10 @@ class ProfileAdmin(commands.Cog):
                                     bank = excluded.bank,
                                     attributes = excluded.attributes,
                                     occupation = excluded.occupation,
-                                    moneylastcollected = excluded.moneylastcollected
-                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json)) 
+                                    moneylastcollected = excluded.moneylastcollected,
+                                    items = excluded.items,
+                                    education = excluded.education
+                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json, education_json)) 
                             await db.commit()
                             await interaction.response.send_message(
                                 embed=discord.Embed(description=f"`Successfully created: {charactername}`", colour=constants.colorHexes["Success"]),
@@ -109,6 +113,66 @@ class ProfileAdmin(commands.Cog):
                             print(f"Unexpected error during profile creation: {e}")
             except Exception as e:
                         print(e)
+
+    @app_commands.command(name="setlevel", description="Set all of your attribute levels")
+    async def setlevel(self, interaction: discord.Interaction, member: discord.Member, strength: float, intelligence: float, dexterity: float, charisma: float, wisdom: float):
+        guild_id = str(interaction.guild.id)
+        user_id = str(member.id)
+        async with aiosqlite.connect('profiles.db') as db:
+            async with db.execute('''SELECT attributes FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
+                profile = await cursor.fetchone()
+                if not profile:
+                    await interaction.response.send_message(embed=basicEmbeds["OtherNoProfile"], ephemeral=True)
+                    return
+                
+
+                attributes_json = profile[0]
+                attributes_data = json.loads(attributes_json) if attributes_json else {}
+
+                strength_attribute = attributes.Attribute.from_dict(attributes_data.get("strength", {}))
+                dexterity_attribute = attributes.Attribute.from_dict(attributes_data.get("dexterity", {}))
+                intelligence_attribute = attributes.Attribute.from_dict(attributes_data.get("intelligence", {}))
+                charisma_attribute = attributes.Attribute.from_dict(attributes_data.get("charisma", {}))
+                wisdom_attribute = attributes.Attribute.from_dict(attributes_data.get("wisdom", {})) 
+
+
+                if strength > 100:
+                    await interaction.response.send_message(embed=discord.Embed(description="Must be below 100", colour=constants.colorHexes["Danger"]))
+                else:
+                    strength_attribute.SetLevel(strength)
+                    attributes_data["strength"] = strength_attribute.to_dict()
+
+                if intelligence > 100:
+                    await interaction.response.send_message(embed=discord.Embed(description="Must be below 100", colour=constants.colorHexes["Danger"]))
+                else:
+                    intelligence_attribute.SetLevel(intelligence)
+                    attributes_data["intelligence"] = intelligence_attribute.to_dict()
+
+                if dexterity > 100:
+                    await interaction.response.send_message(embed=discord.Embed(description="Must be below 100", colour=constants.colorHexes["Danger"]))
+                else:
+                    dexterity_attribute.SetLevel(dexterity)
+                    attributes_data["dexterity"] = dexterity_attribute.to_dict()
+
+                if charisma > 100:
+                    await interaction.response.send_message(embed=discord.Embed(description="Must be below 100", colour=constants.colorHexes["Danger"]))
+                else:
+                    charisma_attribute.SetLevel(charisma)
+                    attributes_data["charisma"] = charisma_attribute.to_dict()
+
+                if wisdom > 100:
+                    await interaction.response.send_message(embed=discord.Embed(description="Must be below 100", colour=constants.colorHexes["Danger"]))
+                else:
+                    wisdom_attribute.SetLevel(wisdom)
+                    attributes_data["wisdom"] = wisdom_attribute.to_dict()
+
+                updated_attributes_json = json.dumps(attributes_data)
+
+                await db.execute('''UPDATE profiles SET attributes = ? WHERE guild_id = ? AND user_id = ?''',(updated_attributes_json, guild_id, user_id))
+                await db.commit()
+                await logs.send_player_log(self.bot, 'Set Level', f"Changed Level", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, member)
+
+                await interaction.response.send_message(embed=discord.Embed(description="`Levels set`"))
             
     @app_commands.command(name="profile", description="Gets the profile of a user.")
     async def profile(self, interaction: discord.Interaction, user: discord.Member):
@@ -165,7 +229,7 @@ class ProfileAdmin(commands.Cog):
                                     f"**Full Time Job**\n\n"
                                     f"**Job:** `{job_name}`\n"
                                     f"**Description:** `{job_desc}`\n"
-                                    f"**Job:** `{utils.to_money(job_pay)}`\n",
+                                    f"**Pay:** `{utils.to_money(job_pay)}`\n",
                                     
                         colour=constants.colorHexes['MediumBlue']
                     )

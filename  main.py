@@ -37,6 +37,7 @@ async def init_db():
                          occupation TEXT NOT NULL,
                          moneylastcollected TEXT NOT NULL,
                          items TEXT NOT NULL,
+                         education TEXT NOT NULL,
                          PRIMARY KEY (guild_id, user_id)
                          )
                          ''')
