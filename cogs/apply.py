@@ -127,9 +127,9 @@ class Apply(commands.Cog):
 
             embed = discord.Embed(
                 description=f"Listing set to `{job_name}`",
-                color=discord.Color.green(),
+                color=constants.colorHexes["Success"],
             )
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="checklisting", description="Checks the current job listing")
     async def checklisting(self, interaction: discord.Interaction):
