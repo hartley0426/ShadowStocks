@@ -1,64 +1,77 @@
 import random
-import datetime
 from utilities import utils
+import datetime
 
-
-listing = {}
-last_updated = datetime.datetime.now()
+last_updated = {}
+listings = {}
 
 class Job:
-
-    name: str
-    pay: float
-    description: str
-    requirements: dict[str, float]
-
-    def __init__(self, name: str, pay: float, description: str, requirements: dict[str, float]) -> None:
+    def __init__(self, name: str, pay: float, description: str, requirements: dict[str, float], education: dict[str]) -> None:
         self.name = name
         self.pay = pay
         self.description = description
         self.requirements = requirements
+        self.education = education
 
     def GetName(self) -> str:
         return self.name
-    
+
     def GetPay(self) -> float:
         return self.pay
-    
+
     def GetDesc(self) -> str:
         return self.description
-    
+
     def GetRequirements(self) -> dict[str, float]:
         return self.requirements
 
+    def GetEducation(self) -> dict[str]:
+        return self.education
+
+
 class Listing:
 
-    def GenerateListings(self, guild_id) -> None:
-        global listing
-        if guild_id not in listing:
-            listing[guild_id] = []
 
-        available_jobs = [job_key for job_key in Jobs.keys() if job_key != "unemployed"]
-        new_job = random.choice(available_jobs)
-        listing[guild_id] = Jobs[new_job]
+    def GenerateListings(self, guild_id):
+        try:
+            if guild_id not in listings:
+                listings[guild_id] = []
+            available_jobs = [job_key for job_key in Jobs.keys() if job_key != "unemployed"]
+            listings[guild_id] = random.choice(available_jobs)
+        except Exception as e:
+            print(f"Error during listing generation: {e}")
 
-    def CheckUpdate(self, guild_id) -> bool:
-        global last_updated
-        time_since_update = utils.get_time_delta(initial_time=last_updated)
-        if time_since_update["minutes"] > 5:
-            self.GenerateListings(guild_id)
-            last_updated = datetime.datetime.now()
+    def CheckUpdate(self, guild_id):
+        try:
+            last_update_time = last_updated.get(guild_id, None)
+
+            if last_update_time is None:
+                self.GenerateListings(guild_id)
+                last_updated[guild_id] = datetime.datetime.now()
+                return True
+            else:
+                time_since_update = utils.get_time_delta(initial_time=last_update_time)
+                if time_since_update.get("Hours", 0) > 5:
+                    self.GenerateListings(guild_id)
+                    last_updated[guild_id] = datetime.datetime.now()
+                    return True
+                else:
+                    return False
+        except Exception as e:
+            print(f"Error during listing check for guild {guild_id}: {e}")
+
+    def GetListing(self, guild_id):
+        return listings.get(guild_id, None)
+
+    def ForceListing(self, guild_id, job_key):
+        if job_key in Jobs:
+            listings[guild_id] = job_key
+            last_updated[guild_id] = datetime.datetime.now()
+            print(f"Forced listing for guild {guild_id} to {job_key}")
             return True
+        print(f"Invalid job key: {job_key}")
         return False
 
-    def GetListing(self, guild_id) -> list[Job]:
-        if self.CheckUpdate(guild_id):
-            return listing.get(guild_id, [])
-        return listing.get(guild_id, [])
-        
-    def GetLastUpdated(self) -> datetime.datetime:
-        global last_updated
-        return last_updated
 
         
 
@@ -73,7 +86,8 @@ Jobs = {
             "intelligence": 0.0,
             "charisma": 0.0,
             "wisdom": 0.0,
-        }
+        },
+        education={}
     ),
     "cashier": Job(
         name="Cashier",
@@ -85,7 +99,8 @@ Jobs = {
             "intelligence": 10.0,
             "charisma": 5.0,
             "wisdom": 0.0,
-        }
+        },
+        education={}
     ),
     "bagger": Job(
         name="Bagger",
@@ -97,7 +112,8 @@ Jobs = {
             "intelligence": 0.0,
             "charisma": 0.0,
             "wisdom": 0.0,
-        }
+        },
+        education={}
     ),
     "stocker": Job(
         name="Stocker",
@@ -109,11 +125,12 @@ Jobs = {
             "intelligence": 0.0,
             "charisma": 0.0,
             "wisdom": 0.0,
-        }
+        },
+        education={}
     ),
     "gcsupervisor": Job(
         name="Grocery Store Supervsior",
-        pay=13.0,
+        pay=23.0,
         description=("Works at a Grocery Store | Watches over on duty personel and handles supervisory duties."),
         requirements={
             "strength": 0.0,
@@ -121,11 +138,12 @@ Jobs = {
             "intelligence": 10.0,
             "charisma": 5.0,
             "wisdom": 10.0,
-        }
+        },
+        education={}
     ),
     "gcmanager": Job(
         name="Grocery Store Manager",
-        pay=15.0,
+        pay=39.0,
         description=("Works at a Grocery Store | Watches over an entire store."),
         requirements={
             "strength": 5.0,
@@ -133,7 +151,8 @@ Jobs = {
             "intelligence": 20.0,
             "charisma": 10.0,
             "wisdom": 15.0,
-        }
+        },
+        education={"a_businessmanagement"}
     ),
     "nurse": Job(
         name="Nurse",
@@ -145,7 +164,8 @@ Jobs = {
             "intelligence": 50.0,
             "charisma": 15.0,
             "wisdom": 10.0,
-        }
+        },
+        education={"a_medicine"}
     ),
     "doctor": Job(
         name="Doctor",
@@ -157,7 +177,8 @@ Jobs = {
             "intelligence": 55.0,
             "charisma": 20.0,
             "wisdom": 20.0,
-        }
+        },
+        education={"b_medicine"}
     ),
     "surgeon": Job(
         name="Surgeon",
@@ -169,7 +190,8 @@ Jobs = {
             "intelligence": 60.0,
             "charisma": 20.0,
             "wisdom": 30.0,
-        }
+        },
+        education={"m_medicine"}
     ),
     "headofmedicine": Job(
         name="Head of Medicine",
@@ -181,19 +203,21 @@ Jobs = {
             "intelligence": 68.0,
             "charisma": 25.0,
             "wisdom": 40.0,
-        }
+        },
+        education={"b_medicine", "b_businessmanagement"}
     ),
     "deanofthehospital": Job(
         name="Dean of the Hospital",
-        pay=200.0,
-        description=("Works at a Hospital | Watches over an entire store."),
+        pay=400.0,
+        description=("Works at a Hospital | Watches over an entire hospital."),
         requirements={
             "strength": 15.0,
             "dexterity": 47.0,
             "intelligence": 75.0,
             "charisma": 40.0,
             "wisdom": 50.0,
-        }
+        },
+        education={"m_medicine", "m_businessmanagement"}
     ),
     "teachersassistant": Job(
         name="Teacher's Assistant",
@@ -205,7 +229,8 @@ Jobs = {
             "intelligence": 0.0,
             "charisma": 0.0,
             "wisdom": 0.0,
-        }
+        },
+        education={}
     ),
     "schoolaid": Job(
         name="School Aid",
@@ -217,7 +242,8 @@ Jobs = {
             "intelligence": 0.0,
             "charisma": 0.0,
             "wisdom": 0.0,
-        }
+        },
+        education={}
     ),
     "teacher": Job(
         name="Teacher",
@@ -229,7 +255,8 @@ Jobs = {
             "intelligence": 10.0,
             "charisma": 10.0,
             "wisdom": 5.0,
-        }
+        },
+        education={"a_education"}
     ),
     "principal": Job(
         name="Principal",
@@ -241,11 +268,12 @@ Jobs = {
             "intelligence": 15.0,
             "charisma": 20.0,
             "wisdom": 15.0,
-        }
+        },
+        education={"b_education", "a_businessmanagement"}
     ),
     "superintendent": Job(
         name="Superindentent",
-        pay=47.0,
+        pay=57.0,
         description=("Works at a school | Watches over an entire school district."),
         requirements={
             "strength": 5.0,
@@ -253,11 +281,12 @@ Jobs = {
             "intelligence": 20.0,
             "charisma": 20.0,
             "wisdom": 20.0,
-        }
+        },
+        education={"b_education", "b_businessmanagement"}
     ),
     "professor": Job(
         name="Professor",
-        pay=45.0,
+        pay=68.0,
         description=("Works at a college | Teaches a college class."),
         requirements={
             "strength": 5.0,
@@ -265,11 +294,12 @@ Jobs = {
             "intelligence": 25.0,
             "charisma": 22.0,
             "wisdom": 25.0,
-        }
+        },
+        education={"m_education"}
     ),
     "deanofthecollege": Job(
         name="Dean of the College",
-        pay=45.0,
+        pay=279.0,
         description=("Works at a college | Watches over an entire college."),
         requirements={
             "strength": 5.0,
@@ -277,7 +307,8 @@ Jobs = {
             "intelligence": 30.0,
             "charisma": 25.0,
             "wisdom": 30.0,
-        }
+        },
+        education={"m_education", "m_businessmanagement"}
     ),
     "mechanic": Job(
         name="Mechanic",
@@ -289,7 +320,8 @@ Jobs = {
             "intelligence": 10.0,
             "charisma": 25.0,
             "wisdom": 5.0,
-        }
+        },
+        education={}
     ),
     "flightattendent": Job(
         name="Flight Attendant",
@@ -301,7 +333,8 @@ Jobs = {
             "intelligence": 10.0,
             "charisma": 40.0,
             "wisdom": 15.0,
-        }
+        },
+        education={}
     ),
     "pilot": Job(
         name="Pilot",
@@ -313,7 +346,8 @@ Jobs = {
             "intelligence": 20.0,
             "charisma": 20.0,
             "wisdom": 25.0,
-        }
+        },
+        education={}
     ),
     "itsupport": Job(
         name="IT Support Specialist",
@@ -325,7 +359,8 @@ Jobs = {
             "intelligence": 50.0,
             "charisma": 25.0,
             "wisdom": 25.0,
-        }
+        },
+        education={"m_computer_science"}
     ),
 
 }

@@ -9,19 +9,21 @@ import aiosqlite
 import constants
 from utilities import utils, logs
 from utilities.embeds import basicEmbeds
-from jobutilities import jobs, attributes
+from jobutilities import jobs, attributes, educationutils
 
 class ConfirmButton(discord.ui.View):
-    def __init__(self, user_id, listing, attributes_json, occupation):
+    def __init__(self, bot, user_id, listing, attributes_json, occupation, education_json):
         super().__init__(timeout=100)
+        self.bot = bot
         self.user_id = user_id
         self.listing = listing
         self.attributes_json = attributes_json
         self.occupation = occupation
+        self.education_json = education_json
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.danger)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        try:
+       
             if interaction.user.id != self.user_id:
                 embed = discord.Embed(
                     description="This is not your button!",
@@ -30,48 +32,70 @@ class ConfirmButton(discord.ui.View):
                 await interaction.response.send_message(embed=embed, ephemeral=True)
                 return
             
-            applied_job = self.listing
             attributes_data = json.loads(self.attributes_json) if self.attributes_json else {}
+            education_data = json.loads(self.education_json) if self.education_json else {}
 
-            # Deserialize attributes
+            job_object = jobs.Jobs.get(self.listing, jobs.Jobs["unemployed"])
+        
+            job_name = job_object.GetName()
+            job_pay = job_object.GetPay()
+            job_requirements = job_object.GetRequirements()
+            job_education = job_object.GetEducation()
+
+
+
             attribute_objects = {k: attributes.Attribute.from_dict(v) for k, v in attributes_data.items()}
-
-            # Check for missing requirements
+            education_objects = {key: educationutils.Degrees[key] for key in education_data}
+    
+            
             missing_requirements = [
                 f"{attribute.capitalize()} | **Required:** {required_value} | **You have:** {attribute_objects[attribute].GetLevel()}"
-                for attribute, required_value in applied_job.requirements.items()
+                for attribute, required_value in job_requirements.items()
                 if attribute_objects.get(attribute, attributes.Attribute()).GetLevel() < required_value
             ]
+            
+            missing_education = [
+                f"**Required:** `{educationutils.Degrees[education].get_name()}`"  
+                for education in job_education
+                if education not in education_objects
+            ]
 
+            if missing_education:
+                embed = discord.Embed(
+                    title="Application Failed",
+                    description=f"You do not meet the requirements for the job `{job_name}`.\n\n***Missing degrees:***\n\n" + "\n".join(missing_education),
+                    colour=constants.colorHexes["DarkBlue"]
+                )
+                embed.set_footer(text="Do /college to get degrees")
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
+    
+             
             if missing_requirements:
                 embed = discord.Embed(
                     title="Application Failed",
-                    description=f"You do not meet the requirements for the job {applied_job.name}.\n\n***Missing requirements:***\n" + "\n".join(missing_requirements),
+                    description=f"You do not meet the requirements for the job `{job_name}`.\n\n***Missing requirements:***\n\n" + "\n".join(missing_requirements),
                     colour=constants.colorHexes["DarkBlue"]
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
                 return
-
-            job_key = next(key for key, job in jobs.Jobs.items() if job == applied_job)
-
-            # Open a new database connection here
             async with aiosqlite.connect('profiles.db') as db:
                 await db.execute(
                     '''UPDATE profiles SET occupation = ? WHERE guild_id = ? AND user_id = ?''',
-                    (job_key, interaction.guild.id, self.user_id)
+                    (self.listing, interaction.guild.id, self.user_id)
                 )
                 await db.commit()
+                embed = discord.Embed(
+                    title="Application Successful",
+                    description=f"Successfully applied for `{job_name}`. You are now paid `{utils.to_money(job_pay)}` per hour.",
+                    colour=constants.colorHexes["DarkBlue"]
+                )
+                await logs.send_player_log(self.bot, 'Application', f"Successfully applied for {job_name}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
+                await interaction.response.send_message(embed=embed)
+    
 
-            embed = discord.Embed(
-                title="Application Successful",
-                description=f"Successfully applied for `{applied_job.name}`. You are now paid `{utils.to_money(applied_job.pay)}` per hour.",
-                colour=constants.colorHexes["DarkBlue"]
-            )
-            await logs.send_player_log(self.bot, 'Application', f"Successfully applied for {applied_job.name}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
-            await interaction.response.send_message(embed=embed)
-
-        except Exception as e:
-            print(e)
+        
+            
 
 class Apply(commands.Cog):
     def __init__(self, bot):
@@ -79,7 +103,33 @@ class Apply(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"Apply is ready.")    
+        print(f"Apply is ready.")  
+
+    @app_commands.command(name="forcelisting", description="Forces the current listing.")
+    async def forcelisting(self, interaction: discord.Interaction, listing: str):
+        moderator_id = utils.get_config(interaction.guild.id, "moderator_role_id")
+        if not interaction.user.get_role(moderator_id):
+            await interaction.response.send_message(embed=basicEmbeds["SelfNoPermission"], ephemeral=True)
+            return
+        if listing not in jobs.Jobs:
+            embed = discord.Embed(description="`This listing doesn't exist`", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+        else:
+            job_key = listing
+            logs.send_player_log(self.bot, "Force Listing", f"Forced listing to: {listing}", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
+            jobs.listings[interaction.guild.id] = listing
+
+            job_object = jobs.Jobs.get(listing, jobs.Jobs["unemployed"])
+
+            jobs.last_updated[interaction.guild.id] = datetime.now()
+    
+            job_name = job_object.GetName()
+
+            embed = discord.Embed(
+                description=f"Listing set to `{job_name}`",
+                color=discord.Color.green(),
+            )
+            await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="checklisting", description="Checks the current job listing")
     async def checklisting(self, interaction: discord.Interaction):
@@ -87,13 +137,16 @@ class Apply(commands.Cog):
 
         listing_instance = jobs.Listing()
 
-        try:
-            if listing_instance.CheckUpdate(guild_id):
-                listing_instance.GenerateListings(guild_id)
-        except Exception as e:
-            print(e)
+        if listing_instance.CheckUpdate(guild_id):
+            listing_instance.GenerateListings(guild_id)
 
-        listing = listing_instance.GetListing(guild_id)
+        listing = jobs.listings.get(guild_id)
+
+        job_object = jobs.Jobs.get(listing, jobs.Jobs["unemployed"])
+        
+        job_name = job_object.GetName()
+        job_desc = job_object.GetDesc()
+        job_pay = job_object.GetPay()
 
         if not listing:
             embed = discord.Embed(
@@ -103,12 +156,9 @@ class Apply(commands.Cog):
             return
 
         try:
-            job_descriptions = "\n".join([f"**{listing.GetName()}**: {listing.GetDesc()} | **Pay:** `${listing.GetPay()}/hour)`"])
-        except Exception as e:
-            print(e)
+            job_descriptions = "\n".join([f"**{job_name}**: {job_desc} \n\n**Pay:** `{utils.to_money(job_pay)}/hour)`"])
+        except Exception:
             job_descriptions = "`An error occurred while generating job descriptions.`"
-        except Exception as e:
-            print(e)
 
         embed = discord.Embed(
             title="Current Job Listing",
@@ -123,24 +173,27 @@ class Apply(commands.Cog):
         user_id = interaction.user.id
 
         async with aiosqlite.connect('profiles.db') as db:
-            async with db.execute('''SELECT attributes, occupation FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
+            async with db.execute('''SELECT attributes, occupation, education FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
                 profile = await cursor.fetchone()
 
                 if not profile:
                     await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                     return
 
-                attributes_json, occupation = profile
+                attributes_json, occupation, education_json = profile
 
                 listing_instance = jobs.Listing()
 
-                try:
-                    if listing_instance.CheckUpdate(guild_id):
-                        listing_instance.GenerateListings(guild_id)
-                except Exception as e:
-                    print(e)
+                if listing_instance.CheckUpdate(guild_id):
+                    listing_instance.GenerateListings(guild_id)
 
-                listing = listing_instance.GetListing(guild_id)
+                listing = jobs.listings.get(guild_id)
+
+                job_object = jobs.Jobs.get(listing, jobs.Jobs["unemployed"])
+                
+                job_name = job_object.GetName()
+                job_desc = job_object.GetDesc()
+                job_pay = job_object.GetPay()
 
                 if not listing:
                     embed = discord.Embed(
@@ -150,18 +203,15 @@ class Apply(commands.Cog):
                     return
 
                 try:
-                    job_descriptions = "\n".join([f"**{listing.GetName()}**: {listing.GetDesc()} | **Pay:** `${listing.GetPay()}/hour)`"])
-                except Exception as e:
-                    print(e)
+                    job_descriptions = "\n".join([f"**{job_name}**: {job_desc} \n\n**Pay:** `{utils.to_money(job_pay)}/hour)`"])
+                except Exception:
                     job_descriptions = "`An error occurred while generating job descriptions.`"
-                except Exception as e:
-                    print(e)
 
-                view = ConfirmButton(user_id, listing, attributes_json, occupation)
+                view = ConfirmButton(self.bot, user_id, listing, attributes_json, occupation, education_json)
 
                 embed = discord.Embed(
                     title="Current Job Listing",
-                    description=f"{job_descriptions} | Are you sure you'd like to apply?",
+                    description=f"{job_descriptions}\n\nAre you sure you'd like to apply?",
                     colour=constants.colorHexes["LightBlue"]
                 )
                 await interaction.response.send_message(embed=embed, view=view)

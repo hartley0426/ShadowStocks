@@ -20,7 +20,7 @@ class AttributeTraining(commands.Cog):
         print(f"AttributeTraining is ready.")    
 
     @app_commands.command(name="workout", description="Increase your strength")
-    @app_commands.checks.cooldown(3, 3600, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(4, 3600, key=lambda i: (i.guild_id, i.user.id))
     async def workout(self, interaction: discord.Interaction):
         guild_id = str(interaction.guild.id)
         user_id = str(interaction.user.id)
