@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/SSB.png" alt="icon" width="1080" height="260">
+  <img src="assets/SSB.png" alt="icon" width="1080" height="240">
   <h3 align="center">The Most Realistic Discord Economy Bot</h3>
   <h4 align="center">Made with <a href="https://discordpy.readthedocs.io/en/stable/">Discord.py</a></h4>
 
@@ -12,6 +12,8 @@
   ![Windows](https://img.shields.io/badge/os-windows-yellow)
   
   [![SQLite](https://img.shields.io/badge/SQLite-%2307405e.svg?logo=sqlite&logoColor=white)](#)
+  [![JSON](https://img.shields.io/badge/JSON-000?logo=json&logoColor=fff)](#)
+  [![Visual Studio](https://custom-icon-badges.demolab.com/badge/Visual%20Studio-5C2D91.svg?&logo=visual-studio&logoColor=white)](#)
   
 </div>
 
