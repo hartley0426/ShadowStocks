@@ -77,6 +77,7 @@ class ProfileAdmin(commands.Cog):
                             
                             items = {}
                             education = {}
+                            property = {}
 
                         except Exception as e:
                             print(e)
@@ -84,9 +85,10 @@ class ProfileAdmin(commands.Cog):
                             attributes_json = json.dumps(basic_attributes)
                             items_json = json.dumps(items)
                             education_json = json.dumps(education)
+                            property_json = json.dumps(property)
                             await db.execute('''
-                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items, education)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items, education, property)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 ON CONFLICT(guild_id, user_id) DO UPDATE SET
                                     charactername = excluded.charactername,
                                     age = excluded.age,
@@ -99,8 +101,9 @@ class ProfileAdmin(commands.Cog):
                                     occupation = excluded.occupation,
                                     moneylastcollected = excluded.moneylastcollected,
                                     items = excluded.items,
-                                    education = excluded.education
-                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json, education_json)) 
+                                    education = excluded.education,
+                                    property = excluded.property
+                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json, education_json, property_json)) 
                             await db.commit()
                             await interaction.response.send_message(
                                 embed=discord.Embed(description=f"`Successfully created: {charactername}`", colour=constants.colorHexes["Success"]),

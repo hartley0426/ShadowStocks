@@ -154,4 +154,17 @@ Properties = {
         cost=37996550,
         image="https://hartley0426.github.io/ShadowStocks/assets/propertyimages/house_20.jpg"
     ),
+    'house_22': Property(
+        location="Boston, United States",
+        description="An entire airport. What else do you want?",
+        cost=1096360780,
+        image="https://hartley0426.github.io/ShadowStocks/assets/propertyimages/house_22.jpg"
+    ),
+    'house_21': Property(
+        location="New York, United States",
+        description="The empire state building. Can it get any bigger?.",
+        cost=1890590460,
+        image="https://hartley0426.github.io/ShadowStocks/assets/propertyimages/house_21.jpg"
+    ),
+    
 }
