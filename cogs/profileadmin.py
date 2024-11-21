@@ -60,6 +60,7 @@ class ProfileAdmin(commands.Cog):
 
                             occupation = "unemployed"
                             moneylastcollected = "never"
+                            
 
                             strength_level = 20.0 if difficulty.value == 1 else (15.0 if difficulty.value == 2 else (10.0 if difficulty.value == 3 else 5.0))
                             dexterity_level  = 20.0 if difficulty.value == 1 else (15.0 if difficulty.value == 2 else (10.0 if difficulty.value == 3 else 5.0))
@@ -78,6 +79,8 @@ class ProfileAdmin(commands.Cog):
                             items = {}
                             education = {}
                             property = {}
+                            realestate = {}
+                            realestatelastcollected = {}
 
                         except Exception as e:
                             print(e)
@@ -86,9 +89,11 @@ class ProfileAdmin(commands.Cog):
                             items_json = json.dumps(items)
                             education_json = json.dumps(education)
                             property_json = json.dumps(property)
+                            realestate_json = json.dumps(realestate)
+                            realestatelastcollected_json = json.dumps(realestatelastcollected)
                             await db.execute('''
-                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items, education, property)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items, education, property, realestate, realestatelastcollected)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 ON CONFLICT(guild_id, user_id) DO UPDATE SET
                                     charactername = excluded.charactername,
                                     age = excluded.age,
@@ -102,8 +107,10 @@ class ProfileAdmin(commands.Cog):
                                     moneylastcollected = excluded.moneylastcollected,
                                     items = excluded.items,
                                     education = excluded.education,
-                                    property = excluded.property
-                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json, education_json, property_json)) 
+                                    property = excluded.property,
+                                    realestate = excluded.realestate,
+                                    realestatelastcollected = excluded.realestatelastcollected
+                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json, education_json, property_json, realestate_json, realestatelastcollected_json)) 
                             await db.commit()
                             await interaction.response.send_message(
                                 embed=discord.Embed(description=f"`Successfully created: {charactername}`", colour=constants.colorHexes["Success"]),
