@@ -56,18 +56,28 @@ def to_height(inches: int) -> str:
 
     return ", ".join(result)
 
-def get_time_delta(initial_time : datetime.datetime):
-    """Returns the time delta between the current time and the given time in game time."""
+def get_time_delta(initial_time: datetime.datetime):
     time_delta = datetime.datetime.now() - initial_time
+    total_game_minutes = time_delta.total_seconds()  
 
-    hours, remainder = divmod(time_delta.seconds, 3600) 
-    minutes, seconds = divmod(remainder, 60)
+    minutes_in_an_hour = 60
+    hours_in_a_day = 24
+    days_in_a_month = 30
+    months_in_a_year = 12
+
+    total_game_hours, remaining_minutes = divmod(total_game_minutes, minutes_in_an_hour)
+    total_game_days, remaining_hours = divmod(total_game_hours, hours_in_a_day)
+    total_game_months, remaining_days = divmod(total_game_days, days_in_a_month)
+    total_game_years, remaining_months = divmod(total_game_months, months_in_a_year)
     
-
     return {
-        "days": hours,
-        "hours": minutes,
-        "minutes": seconds}
+        "years": int(total_game_years),
+        "months": int(remaining_months),
+        "days": int(remaining_days),
+        "hours": int(remaining_hours),
+        "minutes": int(remaining_minutes),
+        "total_game_minutes": int(total_game_minutes)
+    }
 
 async def set_cash(db, amount, guild_id, user_id):
     await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (amount, guild_id, user_id))
