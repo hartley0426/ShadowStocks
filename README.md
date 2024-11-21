@@ -58,6 +58,8 @@ ShadowStocks on a time scale. Every action in our bot is on the scale below:
 - `1 Minute` = 1 Second
 - `1 Hour` = 1 Minute
 - `1 Day` = 24 Minutes
+- `1 Month` = 12 Hours
+- `1 Year` = 6 Days
 
 ## Formating
 
