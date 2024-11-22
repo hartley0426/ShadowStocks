@@ -16,7 +16,7 @@ class Store(commands.Cog):
     async def on_ready(self):
         print("Store is ready.")
 
-    @app_commands.command(name="store", description="store")
+    @app_commands.command(name="store", description="Buy items from the store.")
     async def store(self, interaction: discord.Interaction):
         user_id = interaction.user.id
         guild_id = interaction.guild.id

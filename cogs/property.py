@@ -261,7 +261,6 @@ class PropertyDropdown(discord.ui.Select):
 
                     # Initialize as an empty list if items_json is None or not a list
                     existing_property = property_json if isinstance(property_json, list) else []
-                    print(existing_property)
                     if property_key in existing_property:
                         embed = discord.Embed(
                             title="Purchase Failed",
@@ -273,8 +272,6 @@ class PropertyDropdown(discord.ui.Select):
                         return
                     existing_property.append(property_key)
                     updated_property = json.dumps(existing_property)
-
-                    print(updated_property)
 
                     new_cash = cash - property.GetCost()
 

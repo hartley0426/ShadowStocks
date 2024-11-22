@@ -19,6 +19,7 @@ class MarketCog(commands.Cog):
         print("Market is ready.")
 
     @app_commands.command(name="addmarket", description="Adds an asset to the market (no duplicates).")
+    @app_commands.describe(name="The name of the asset you'd like to add", cost="The cost of the asset", description="What does your asset do?")
     async def addmarket(self, interaction: discord.Interaction, name: str, cost: int, description: str):
         guild_id = str(interaction.guild.id)
 
@@ -47,6 +48,7 @@ class MarketCog(commands.Cog):
         )
 
     @app_commands.command(name="removemarket", description="Removes an asset from the market.")
+    @app_commands.describe(name="The name of the item you wish to remove.")
     async def removemarket(self, interaction: discord.Interaction, name: str):
         guild_id = str(interaction.guild.id)
 

@@ -41,6 +41,8 @@ async def init_db():
                          property TEXT NOT NULL,
                          realestate TEXT NOT NULL,
                          realestatelastcollected TEXT NOT NULL,
+                         businesses TEXT NOT NULL,
+                         businesseslastcollected TEXT NOT NULL,
                          PRIMARY KEY (guild_id, user_id)
                          )
                          ''')

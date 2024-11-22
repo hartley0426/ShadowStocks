@@ -106,6 +106,7 @@ class Apply(commands.Cog):
         print(f"Apply is ready.")  
 
     @app_commands.command(name="forcelisting", description="Forces the current listing.")
+    @app_commands.describe(listing="The listing you'd like to force the current listing to be.")
     async def forcelisting(self, interaction: discord.Interaction, listing: str):
         moderator_id = utils.get_config(interaction.guild.id, "moderator_role_id")
         if not interaction.user.get_role(moderator_id):

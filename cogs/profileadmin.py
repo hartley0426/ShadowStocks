@@ -81,7 +81,8 @@ class ProfileAdmin(commands.Cog):
                             property = {}
                             realestate = {}
                             realestatelastcollected = {}
-
+                            businesses = {}
+                            businesseslastcollected = {}
                         except Exception as e:
                             print(e)
                         try: 
@@ -91,9 +92,11 @@ class ProfileAdmin(commands.Cog):
                             property_json = json.dumps(property)
                             realestate_json = json.dumps(realestate)
                             realestatelastcollected_json = json.dumps(realestatelastcollected)
+                            businesses_json = json.dumps(businesses)
+                            businesseslastcollected_json = json.dumps(businesseslastcollected)
                             await db.execute('''
-                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items, education, property, realestate, realestatelastcollected)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items, education, property, realestate, realestatelastcollected, businesses, businesseslastcollected)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 ON CONFLICT(guild_id, user_id) DO UPDATE SET
                                     charactername = excluded.charactername,
                                     age = excluded.age,
@@ -109,8 +112,10 @@ class ProfileAdmin(commands.Cog):
                                     education = excluded.education,
                                     property = excluded.property,
                                     realestate = excluded.realestate,
-                                    realestatelastcollected = excluded.realestatelastcollected
-                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json, education_json, property_json, realestate_json, realestatelastcollected_json)) 
+                                    realestatelastcollected = excluded.realestatelastcollected,
+                                    businesses = excluded.businesses,
+                                    businesseslastcollected = excluded.businesseslastcollected
+                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json, education_json, property_json, realestate_json, realestatelastcollected_json, businesses_json, businesseslastcollected_json)) 
                             await db.commit()
                             await interaction.response.send_message(
                                 embed=discord.Embed(description=f"`Successfully created: {charactername}`", colour=constants.colorHexes["Success"]),
@@ -125,6 +130,7 @@ class ProfileAdmin(commands.Cog):
                         print(e)
 
     @app_commands.command(name="setlevel", description="Set all of your attribute levels")
+    @app_commands.describe(member="The member you wish to set the levels of", strength="The level you wish to set strength to", intelligence="The level you wish to set intelligence to", dexterity="The level you wish to set dexterity to", charisma="The level you wish to set charisma to", wisdom="The level you wish to set wisdom to",)
     async def setlevel(self, interaction: discord.Interaction, member: discord.Member, strength: float, intelligence: float, dexterity: float, charisma: float, wisdom: float):
         guild_id = str(interaction.guild.id)
         user_id = str(member.id)
@@ -182,9 +188,17 @@ class ProfileAdmin(commands.Cog):
                 await db.commit()
                 await logs.send_player_log(self.bot, 'Set Level', f"Changed Level", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user, member)
 
-                await interaction.response.send_message(embed=discord.Embed(description="`Levels set`"))
+                embed=discord.Embed(description="`Levels set:`", colour=constants.colorHexes["LightBlue"])
+                embed.add_field(name="Strength", value=f"`{strength}`")
+                embed.add_field(name="Intelligence", value=f"`{intelligence}`")
+                embed.add_field(name="Dexterity", value=f"`{dexterity}`")
+                embed.add_field(name="Charisma", value=f"`{charisma}`")
+                embed.add_field(name="Wisdom", value=f"`{wisdom}`")
+
+                await interaction.response.send_message(embed=embed)
             
     @app_commands.command(name="profile", description="Gets the profile of a user.")
+    @app_commands.describe(user="The user to find the profile of")
     async def profile(self, interaction: discord.Interaction, user: discord.Member):
         user_id = user.id
         guild_id = interaction.guild.id
@@ -230,17 +244,16 @@ class ProfileAdmin(commands.Cog):
                                     f"**Easy Banking**\n\n"
                                     f"**Cash:** `{utils.to_money(cash)}`\n"
                                     f"**Bank:** `{utils.to_money(bank)}`\n\n"
+                                    f"**Full Time Job**\n\n"
+                                    f"**Job:** `{job_name}`\n"
+                                    f"**Description:** `{job_desc}`\n"
+                                    f"**Pay:** `{utils.to_money(job_pay)}`\n"
                                     f"**Attributes**\n\n"
                                     f"**Strength:** `{strength_percentage}%`\n"
                                     f"**Dexterity:** `{dexterity_percentage}%`\n"
                                     f"**Intelligence:** `{intelligence_percentage}%`\n"
                                     f"**Charisma:** `{charisma_percentage}%`\n"
-                                    f"**Wisdom:** `{wisdom_percentage}%`\n\n"
-                                    f"**Full Time Job**\n\n"
-                                    f"**Job:** `{job_name}`\n"
-                                    f"**Description:** `{job_desc}`\n"
-                                    f"**Pay:** `{utils.to_money(job_pay)}`\n",
-                                    
+                                    f"**Wisdom:** `{wisdom_percentage}%`\n\n",
                         colour=constants.colorHexes['MediumBlue']
                     )
 

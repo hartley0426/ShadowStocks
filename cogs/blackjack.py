@@ -44,12 +44,12 @@ def get_total(hand):
     aces = sum(1 for card in hand if card[0].startswith('A'))
     while total > 21 and aces:
         total -= 10
-        ace -= 1
+        aces -= 1
 
     return total
 
 class BlackjackView(discord.ui.View):
-    def __init__(self, user_id, game_message, deck, bet, db, cursor, cash):
+    def __init__(self, user_id, game_message, deck, bet, db, cursor, cash, bot):
         super().__init__()
         self.user_id = user_id
         self.game_message = game_message
@@ -58,13 +58,23 @@ class BlackjackView(discord.ui.View):
         self.db = db
         self.cursor = cursor
         self.cash = cash
+        self.bot = bot
+
+    def disable_buttons(self):
+        self.clear_items()  # Remove all items
+        # Re-add buttons as disabled
+        self.add_item(discord.ui.Button(label="Hit", style=discord.ButtonStyle.primary, disabled=True))
+        self.add_item(discord.ui.Button(label="Stand", style=discord.ButtonStyle.primary, disabled=True))
 
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.primary)
     async def hit(self, interaction: discord.Interaction, button: discord.ui.Button):
         if str(interaction.user.id) != str(self.user_id):
-            await interaction.response.send_message(embed=discord.Embed(description="This is not your game!", colour=constants.colorHexes["Danger"]), ephemeral=True)
+            await interaction.response.send_message(
+                embed=discord.Embed(description="This is not your game!", colour=constants.colorHexes["Danger"]),
+                ephemeral=True
+            )
             return
-        
+
         db = self.db
 
         player_hand = games[self.user_id]['player']
@@ -72,6 +82,7 @@ class BlackjackView(discord.ui.View):
         total = get_total(player_hand)
 
         if total > 21:
+            # Game Over logic
             embed = discord.Embed(
                 title="Blackjack Game",
                 description=f"**Your Hand:** `{', '.join(card[0] for card in player_hand)}` | **Total:** `{total}`\n"
@@ -80,13 +91,19 @@ class BlackjackView(discord.ui.View):
             )
 
             embed.add_field(name="Result", value="Busted! You Lose", inline=False)
-            await logs.send_player_log(self.bot, 'Lost Blackjack', f"Busted", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
-            del games[self.user_id]
-            await interaction.response.edit_message(embed=embed)
+            await logs.send_player_log(self.bot, 'Lost Blackjack', "Busted", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
-        elif total == 21: 
-            new_cash = self.cash + (2*self.bet)
-            await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, interaction.guild.id, self.user_id))
+            # Disable buttons
+            self.disable_buttons()
+            await interaction.response.edit_message(embed=embed, view=self)
+
+        elif total == 21:
+            # Player wins with 21
+            new_cash = self.cash + (2 * self.bet)
+            await db.execute(
+                '''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''',
+                (new_cash, interaction.guild.id, self.user_id)
+            )
             await db.commit()
 
             embed = discord.Embed(
@@ -94,12 +111,15 @@ class BlackjackView(discord.ui.View):
                 description=f"**Your Hand:** `{', '.join(card[0] for card in player_hand)}` | **Total:** `{total}`\n",
                 colour=constants.colorHexes["SkyBlue"]
             )
-            embed.add_field(name="Result", value=f"You got 21! you win {utils.to_money(2*self.bet)}", inline=False)
-            await logs.send_player_log(self.bot, 'Won Blackjack', f"Got 21", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
+            embed.add_field(name="Result", value=f"You got 21! You win {utils.to_money(2 * self.bet)}", inline=False)
+            await logs.send_player_log(self.bot, 'Won Blackjack', "Got 21", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
-            await interaction.response.edit_message(embed=embed)
+            # Disable buttons
+            self.disable_buttons()
+            await interaction.response.edit_message(embed=embed, view=self)
 
         else:
+            # Game continues
             embed = discord.Embed(
                 title="Blackjack Game",
                 description=f"**Your Hand:** `{', '.join(card[0] for card in player_hand)}` | **Total:** `{total}`\n"
@@ -111,9 +131,12 @@ class BlackjackView(discord.ui.View):
     @discord.ui.button(label="Stand", style=discord.ButtonStyle.primary)
     async def stand(self, interaction: discord.Interaction, button: discord.ui.Button):
         if str(interaction.user.id) != str(self.user_id):
-            await interaction.response.send_message(embed=discord.Embed(description="`This is not your game!`", colour=constants.colorHexes["Danger"]), ephemeral=True)
+            await interaction.response.send_message(
+                embed=discord.Embed(description="`This is not your game!`", colour=constants.colorHexes["Danger"]),
+                ephemeral=True
+            )
             return
-        
+
         db = self.db
 
         player_hand = games[self.user_id]['player']
@@ -128,7 +151,6 @@ class BlackjackView(discord.ui.View):
         await interaction.response.edit_message(embed=embed, view=None)
 
         # Dealer Logic
-
         while get_total(dealer_hand) <= 17:
             dealer_hand.append(deal(self.deck))
             await asyncio.sleep(0.5)
@@ -139,46 +161,50 @@ class BlackjackView(discord.ui.View):
         result_embed = discord.Embed(
             title="Blackjack Game",
             description=f"**Your Final Hand:** `{', '.join(card[0] for card in player_hand)}` | **Total:** `{player_total}`\n"
-                        f"**Dealer Final Hand:** `{games[self.user_id]['dealer'][0][0]}` | **Total:** `{dealer_total}`",
+                        f"**Dealer Final Hand:** `{', '.join(card[0] for card in dealer_hand)}` | **Total:** `{dealer_total}`",
             colour=constants.colorHexes["MediumBlue"]
         )
 
         if dealer_total > 21:
-            new_cash = self.cash + (2*self.bet)
-            await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, interaction.guild.id, self.user_id))
+            new_cash = self.cash + (2 * self.bet)
+            await db.execute(
+                '''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''',
+                (new_cash, interaction.guild.id, self.user_id)
+            )
             await db.commit()
 
-            result_embed.add_field(name="Result", value=f"Dealer Busts! You win {utils.to_money(2*self.bet)}", inline=False)
-            await logs.send_player_log(self.bot, 'Won Blackjack', f"Dealer Bust", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
-            del games[self.user_id]
+            result_embed.add_field(name="Result", value=f"Dealer Busts! You win {utils.to_money(2 * self.bet)}", inline=False)
+            await logs.send_player_log(self.bot, 'Won Blackjack', "Dealer Bust", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
         elif dealer_total == player_total:
-            new_cash = self.cash + (self.bet)
-            await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, interaction.guild.id, self.user_id))
+            new_cash = self.cash + self.bet
+            await db.execute(
+                '''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''',
+                (new_cash, interaction.guild.id, self.user_id)
+            )
             await db.commit()
 
             result_embed.add_field(name="Result", value=f"Dealer Tie! You win {utils.to_money(self.bet)}", inline=False)
-            await logs.send_player_log(self.bot, 'Won Blackjack', f"Dealer Tied", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
-
-            del games[self.user_id]
+            await logs.send_player_log(self.bot, 'Tied Blackjack', "Dealer Tie", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
         elif dealer_total > player_total:
             result_embed.add_field(name="Result", value=f"Dealer Wins!", inline=False)
-            await logs.send_player_log(self.bot, 'Lost Blackjack', f"Dealer Won", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
-
-            del games[self.user_id]
+            await logs.send_player_log(self.bot, 'Lost Blackjack', "Dealer Won", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
         else:
-            new_cash = self.cash + (2*self.bet)
-            await db.execute('''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, interaction.guild.id, self.user_id))
+            new_cash = self.cash + (2 * self.bet)
+            await db.execute(
+                '''UPDATE profiles SET cash = ? WHERE guild_id = ? AND user_id = ?''',
+                (new_cash, interaction.guild.id, self.user_id)
+            )
             await db.commit()
-            await logs.send_player_log(self.bot, 'Won Blackjack', f"Beat Dealer", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
             result_embed.add_field(name="Result", value=f"You Won! You win {utils.to_money(2 * self.bet)}", inline=False)
+            await logs.send_player_log(self.bot, 'Won Blackjack', "Beat Dealer", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
-            del games[self.user_id]
-
-        await interaction.edit_original_response(embed=result_embed)
+        # Disable buttons
+        self.disable_buttons()
+        await interaction.edit_original_response(embed=result_embed, view=self)
 
 
         
@@ -245,7 +271,7 @@ class Blackjack(commands.Cog):
 
                 game_message = self.game_message
 
-                view = BlackjackView(user_id, game_message, deck, bet, db, cursor, cash)
+                view = BlackjackView(user_id, game_message, deck, bet, db, cursor, cash, self.bot)
                 await logs.send_player_log(self.bot, 'Began Blackjack', f"Began Blackjack", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
 
                 await interaction.response.send_message(embed=game_message, view=view)

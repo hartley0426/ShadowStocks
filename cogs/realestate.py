@@ -93,7 +93,7 @@ class Realestate(commands.Cog):
                     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
         
         except Exception as e:
-            print(f"1{e}")
+            print(f"{e}")
 
 class RealestateCollectDropdownView(discord.ui.View):
     def __init__(self, user_realestates):
@@ -177,8 +177,6 @@ class RealestateCollectDropdown(discord.ui.Select):
                             updated_collection = json.dumps(realestatelastcollected_json)
 
                             
-
-                            new_bank = bank + realestate_pay
                             await db.execute('''UPDATE profiles SET bank = ?, realestatelastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_bank, updated_collection, interaction.guild.id, interaction.user.id))
                             await db.commit()
 
