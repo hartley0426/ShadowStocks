@@ -36,6 +36,7 @@ Found here will be all links you will need.
   + [Attributes](#attributes)
   + [Businesses](#businesses)
   + [Store & Market](#store-and-marketplace)
++ [Player Guide](#player-guide)
 + [Installation](#installation)
 
 
@@ -106,6 +107,44 @@ ShadowStocks includes both a store and a marketplace to cater to different user 
 
 + **Marketplace:**
 `The marketplace is linked to your account and synced with the guild, providing moderators with the ability to add exclusive items for purchase (e.g., Office Keys, VIP items, etc.).`
+
+# Player Guide
+
+This guide provides players with the essential knowledge to understand game mechanics. Start by familiarizing yourself with the game’s objectives, controls, and core rules to build a strong foundation. With practice and persistence, you’ll develop the skills needed to excel and fully enjoy the experience.
+
+## Earning Money
+
+### Work
+You can work part-time jobs using the `/work` command. The payout is based is on your difficulty and a random chance. This is not the mostly efficent or steady way to make money, but it still works.
+
+### Crime
+You can commit robberies and other crime using the `/crime` command. The fail and payout is based on your difficulty. If you get lucky and get a natural 100 on the success-percentage, you can get a heist which can pay up to 150% of your current balance.
+
+### Rob
+You can rob other players for their money using the `/rob` command. Using both players difficulties, you get a portion of their money.
+
+### Beg
+You can get a small amount of money using the `/beg` command. This is one of the most inefficent ways to make money.
+
+### Gambling
+You can make money through an assortment of gambling commands including `/blackjack`, `/roulette`, `/slots`, `/coinflip`.
+
+### Full Time Jobs
+You can make an acceptable amount of money using the full time jobs mechanic. After getting a job through the `/apply` command, you can get paid hourly *(every minute)* and you can collect using `/collect`. 
+
+### Realestate
+You can earn a good amount of money buy owning realestate and collecting rent using `/getrealestate` and then `collectrealestate`
+
+### Businesses
+You can also buy businesses using `/buybusinesses` and then collecting the businesses using `/collectbusinesses`
+
+## Spending Money
+
+### Store
+Using the `/store` feature you can buy items for your profile. You can view your inventory using `/inventory`
+
+### Property
+You can buy property using `/buyproperty` and view all of them using `/properties`
 
 # Development Documentation
 
