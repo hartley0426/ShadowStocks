@@ -1,7 +1,7 @@
 <div align="center">
   <img src="assets/SSB.png" alt="icon" width=auto height=auto>
   <h3 align="center">The Most Realistic Discord Economy Bot</h3>
-  <h4 align="center">Made with <a href="https://discordpy.readthedocs.io/en/stable/">Discord.py</a></h4>
+  <h4 align="center">Made with <a href="https://discordpy.readthedocs.io/en/stable/">Discord.py</a> </h4>
 
   <hr>
 
@@ -9,18 +9,27 @@
 
   [![Generic badge](https://img.shields.io/badge/Python-3.8-blue.svg)](https://www.python.org/)
   ![Github License](https://img.shields.io/badge/license-MIT-blue)
-  ![Windows](https://img.shields.io/badge/os-windows-yellow)
+ 
   
   [![SQLite](https://img.shields.io/badge/SQLite-%2307405e.svg?logo=sqlite&logoColor=white)](#)
   [![JSON](https://img.shields.io/badge/JSON-000?logo=json&logoColor=fff)](#)
-  [![Visual Studio](https://custom-icon-badges.demolab.com/badge/Visual%20Studio-5C2D91.svg?&logo=visual-studio&logoColor=white)](#)
+  
+  [![Visual Studio Code](https://custom-icon-badges.demolab.com/badge/Visual%20Studio%20Code-0078d7.svg?logo=vsc&logoColor=white)](#)
+  [![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)](#)
+
+  [![GitHub tag](https://img.shields.io/github/tag/Hartley0426/ShadowStocks?include_prereleases=&sort=semver&color=000F17)](https://github.com/Hartley0426/ShadowStocks/releases/)
+
+  <a
+  href="https://discord.com/oauth2/authorize?client_id=1305645434349424640&permissions=1689935212444784&integration_type=0&scope=bot">
+  <img
+  src="https://github.com/hartley0426/ShadowStocks/blob/main/assets/SSBD.png" alt="Download Here" width=10%, height=%10></a>
   
 </div>
 
 
+# Table of Contents
 
-
-## About Us
+# About Us
 Discord, a popular platform for communities to gather and communicate, has seen a significant increase in the development of bots to enhance user engagement. Among these, economy bots are particularly notable for their ability to simulate real-world economic systems and provide users with entertaining yet educational experiences. We distinguish ourselves through several key features:
 
 **Complex Economic Simulation:**
