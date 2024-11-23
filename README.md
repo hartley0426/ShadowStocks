@@ -201,7 +201,7 @@ Installation of ShadowStocks is quite easy.
 1. Navigate to this [link](https://discord.com/oauth2/authorize?client_id=1305645434349424640&permissions=1689935212444784&integration_type=0&scope=bot)
 2. Once you get to that link, you should see a screen like the one below. If so, set the server you'd like to add the bot to, and then click continue. *(Both highlighted in red)*
 
-    <img src="assets/INSTALL1" alt="Download Here" width=auto>
+    <img src="assets/INSTALL1.png" alt="Download Here" width=auto>
     
 3. Once the bot is added to your server. Ensure you have the administrator permission *(If you don't know if you do you probably don't)*.
 4. Lastly, all you have to do is run /config to set the `log channel ID` and the `moderator ID`
