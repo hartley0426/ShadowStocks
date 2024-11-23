@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/SSB.png" alt="icon" width="1080" height="240">
+  <img src="assets/SSB.png" alt="icon" width=auto height=auto>
   <h3 align="center">The Most Realistic Discord Economy Bot</h3>
   <h4 align="center">Made with <a href="https://discordpy.readthedocs.io/en/stable/">Discord.py</a></h4>
 
