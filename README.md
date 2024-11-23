@@ -19,10 +19,7 @@
 
   [![GitHub tag](https://img.shields.io/github/tag/Hartley0426/ShadowStocks?include_prereleases=&sort=semver&color=000F17)](https://github.com/Hartley0426/ShadowStocks/releases/)
 
-  <a
-  href="https://discord.com/oauth2/authorize?client_id=1305645434349424640&permissions=1689935212444784&integration_type=0&scope=bot">
-  <img
-  src="https://github.com/hartley0426/ShadowStocks/blob/main/assets/SSBD.png" alt="Download Here" width=10%, height=%10></a>
+
   
 </div>
 
