@@ -498,18 +498,34 @@ class DepositModal(discord.ui.Modal, title="Deposit Cash"):
 
                 charge_fee_percent = 0.05 if account_obj.get_type() == "checking" and time_since_action["hours"] < 6 else 0
 
-                if charge_fee_percent > 0:
-                    fee = deposit_amount * charge_fee_percent
-                    embed = discord.Embed(
-                        title="Confirm Deposit",
-                        description=f"Confirming will apply a 5% fee: `{utils.to_money(fee)}`\n**Available in:** `{utils.convert_seconds(360 - time_since_action['total_game_minutes'])}`",
-                        colour=constants.colorHexes["Danger"]
-                    )
-                    view = ConfirmFeeDeposit(self.bot, self.user_id, self.guild_id, accounts_json, self.account_name, account_obj, cash, account_id, deposit_amount)
-                    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-                else:
-                    fee = 0
-                    await self.process_deposit(db, interaction, accounts_json, account_obj, account_id, deposit_amount, fee)
+                if account_obj.get_type() == "checking":
+                    if time_since_action["hours"] < 6: 
+                        fee = deposit_amount * charge_fee_percent
+                        embed = discord.Embed(
+                            title="Confirm Deposit",
+                            description=f"Confirming will apply a 5% fee: `{utils.to_money(fee)}`\n**Available in:** `{utils.convert_seconds(360 - time_since_action['total_game_minutes'])}`",
+                            colour=constants.colorHexes["Danger"]
+                        )
+                        view = ConfirmFeeDeposit(self.bot, self.user_id, self.guild_id, accounts_json, self.account_name, account_obj, cash, account_id, deposit_amount)
+                        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+                    else:
+                        fee = 0
+                        await self.process_deposit(db, interaction, accounts_json, account_obj, account_id, deposit_amount, fee)
+
+                else: 
+                    if time_since_action["months"] < 1: 
+                        fee = deposit_amount * charge_fee_percent
+                        embed = discord.Embed(
+                            title="Confirm Deposit",
+                            description=f"Confirming will apply a 5% fee: `{utils.to_money(fee)}`\n**Available in:** `{utils.convert_seconds(43200 - time_since_action['total_game_minutes'])}`",
+                            colour=constants.colorHexes["Danger"]
+                        )
+                        view = ConfirmFeeDeposit(self.bot, self.user_id, self.guild_id, accounts_json, self.account_name, account_obj, cash, account_id, deposit_amount)
+                        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+                    else:
+                        fee = 0
+                        await self.process_deposit(db, interaction, accounts_json, account_obj, account_id, deposit_amount, fee)
+
         except Exception as e:
             await interaction.response.send_message(embed=discord.Embed(description=f"`Error: {e}`", colour=constants.colorHexes["Danger"]), ephemeral=True)
 
