@@ -56,7 +56,7 @@ class ProfileAdmin(commands.Cog):
                             age = random.randint(16,60)
                             height = utils.to_height(random.randint(40,80)) 
                             cash = 1500 if difficulty.value == 1 else (1000 if difficulty.value == 2 else (500 if difficulty.value == 3 else 0))
-                            bank = 0 
+                            
 
                             occupation = "unemployed"
                             moneylastcollected = "never"
@@ -76,6 +76,7 @@ class ProfileAdmin(commands.Cog):
                                 "wisdom": attributes.Attribute(level=wisdom_level, minimum=0.0, maximum=100.0).to_dict()
                             }
                             
+                            accounts = {} 
                             items = {}
                             education = {}
                             property = {}
@@ -94,8 +95,9 @@ class ProfileAdmin(commands.Cog):
                             realestatelastcollected_json = json.dumps(realestatelastcollected)
                             businesses_json = json.dumps(businesses)
                             businesseslastcollected_json = json.dumps(businesseslastcollected)
+                            accounts_json = json.dumps(accounts)
                             await db.execute('''
-                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, bank, attributes, occupation, moneylastcollected, items, education, property, realestate, realestatelastcollected, businesses, businesseslastcollected)
+                                INSERT INTO profiles (guild_id, user_id, charactername, age, gender, difficulty, height, cash, accounts, attributes, occupation, moneylastcollected, items, education, property, realestate, realestatelastcollected, businesses, businesseslastcollected)
                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 ON CONFLICT(guild_id, user_id) DO UPDATE SET
                                     charactername = excluded.charactername,
@@ -104,7 +106,7 @@ class ProfileAdmin(commands.Cog):
                                     difficulty = excluded.difficulty,
                                     height = excluded.height,
                                     cash = excluded.cash,
-                                    bank = excluded.bank,
+                                    accounts = excluded.accounts,
                                     attributes = excluded.attributes,
                                     occupation = excluded.occupation,
                                     moneylastcollected = excluded.moneylastcollected,
@@ -115,7 +117,7 @@ class ProfileAdmin(commands.Cog):
                                     realestatelastcollected = excluded.realestatelastcollected,
                                     businesses = excluded.businesses,
                                     businesseslastcollected = excluded.businesseslastcollected
-                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, bank, attributes_json, occupation, moneylastcollected, items_json, education_json, property_json, realestate_json, realestatelastcollected_json, businesses_json, businesseslastcollected_json)) 
+                            ''', (guild_id, user_id, charactername, age, gender.name, difficulty.name, height, cash, accounts_json, attributes_json, occupation, moneylastcollected, items_json, education_json, property_json, realestate_json, realestatelastcollected_json, businesses_json, businesseslastcollected_json)) 
                             await db.commit()
                             await interaction.response.send_message(
                                 embed=discord.Embed(description=f"`Successfully created: {charactername}`", colour=constants.colorHexes["Success"]),
@@ -203,13 +205,13 @@ class ProfileAdmin(commands.Cog):
         user_id = user.id
         guild_id = interaction.guild.id
         async with aiosqlite.connect('profiles.db') as db:
-            async with db.execute('''SELECT charactername, age, gender, difficulty, height, cash, bank, attributes, occupation FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
+            async with db.execute('''SELECT charactername, age, gender, difficulty, height, cash, attributes, occupation FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
                 profile = await cursor.fetchone()
                 if not profile:
                     await interaction.response.send_message(embed=discord.Embed(description="`This user doesn't have a profile`", colour=constants.colorHexes["Danger"]), ephemeral=True)
                     return
                 else:
-                    charactername, age, gender, difficulty, height, cash, bank, attributes_json, occupation = profile
+                    charactername, age, gender, difficulty, height, cash, attributes_json, occupation = profile
                     attributes_data = json.loads(attributes_json) if attributes_json else {}
 
                     strength_attribute = attributes.Attribute.from_dict(attributes_data.get("strength", {}))
@@ -240,14 +242,12 @@ class ProfileAdmin(commands.Cog):
                                     f"**Age:** `{age}`\n"
                                     f"**Gender:** `{gender}`\n"
                                     f"**Height:** `{height}`\n"
-                                    f"**Difficulty:** `{difficulty}`\n\n"
-                                    f"**Easy Banking**\n\n"
-                                    f"**Cash:** `{utils.to_money(cash)}`\n"
-                                    f"**Bank:** `{utils.to_money(bank)}`\n\n"
+                                    f"**Difficulty:** `{difficulty}`\n"
+                                    f"**Cash:** `{utils.to_money(cash)}`\n\n"
                                     f"**Full Time Job**\n\n"
                                     f"**Job:** `{job_name}`\n"
                                     f"**Description:** `{job_desc}`\n"
-                                    f"**Pay:** `{utils.to_money(job_pay)}`\n"
+                                    f"**Pay:** `{utils.to_money(job_pay)}`\n\n"
                                     f"**Attributes**\n\n"
                                     f"**Strength:** `{strength_percentage}%`\n"
                                     f"**Dexterity:** `{dexterity_percentage}%`\n"

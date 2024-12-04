@@ -11,13 +11,13 @@ from utilities import utils, logs
 from utilities.embeds import basicEmbeds
 from jobutilities import jobs
 
-class cogname(commands.Cog):
+class FullTimeJob(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"cogname is ready.") 
+        print(f"FullTimeJob is ready.") 
 
     @app_commands.command(name="collect", description="Gets your hourly pay.")
     async def collect(self, interaction: discord.Interaction):
@@ -25,14 +25,14 @@ class cogname(commands.Cog):
         guild_id = interaction.guild.id
 
         async with aiosqlite.connect('profiles.db') as db:
-            async with db.execute('''SELECT bank, charactername, occupation, moneylastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
+            async with db.execute('''SELECT cash, charactername, occupation, moneylastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
                 profile = await cursor.fetchone()
 
                 if not profile:
                     await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                     return
                 
-                bank, charactername, occupation, moneylastcollected = profile
+                cash, charactername, occupation, moneylastcollected = profile
 
                 job_object = jobs.Jobs.get(occupation, jobs.Jobs["unemployed"])
                 job_pay = job_object.GetPay()
@@ -40,8 +40,8 @@ class cogname(commands.Cog):
                 if moneylastcollected == "never":
                     try:
                         new_moneylastcollected = datetime.now().isoformat()
-                        new_bank = int(bank + job_pay)
-                        await db.execute('''UPDATE profiles SET bank = ?, moneylastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_bank, new_moneylastcollected, guild_id, user_id))
+                        new_cash = int(cash + job_pay)
+                        await db.execute('''UPDATE profiles SET cash = ?, moneylastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, new_moneylastcollected, guild_id, user_id))
                         await db.commit()
                         embed = discord.Embed(
                             colour=constants.colorHexes["LightBlue"],
@@ -66,9 +66,9 @@ class cogname(commands.Cog):
                     else:
                         try:
                             paycheck = int(job_pay * time_since_collect["hours"])
-                            new_bank = bank + paycheck
+                            new_cash = cash + paycheck
                             new_moneylastcollected = datetime.now().isoformat()
-                            await db.execute('''UPDATE profiles SET bank = ?, moneylastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_bank, new_moneylastcollected, guild_id, user_id))
+                            await db.execute('''UPDATE profiles SET cash = ?, moneylastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, new_moneylastcollected, guild_id, user_id))
                             await db.commit()
                             await logs.send_player_log(self.bot, 'Collection', f"Collected hourly pay after {time_since_collect['hours']}. Received {utils.to_money(paycheck)} ", utils.get_config(interaction.guild.id, 'log_channel_id'), interaction.user)
                         except Exception as e:
@@ -84,5 +84,5 @@ class cogname(commands.Cog):
 
             
 async def setup(bot):
-    cogname_cog = cogname(bot)
-    await bot.add_cog(cogname_cog)
+    FullTimeJob_cog = FullTimeJob(bot)
+    await bot.add_cog(FullTimeJob_cog)

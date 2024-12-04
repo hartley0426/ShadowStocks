@@ -58,14 +58,14 @@ class Realestate(commands.Cog):
         try:
 
             async with aiosqlite.connect('profiles.db') as db:
-                async with db.execute('''SELECT bank, realestate, realestatelastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
+                async with db.execute('''SELECT cash, realestate, realestatelastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
                     profile = await cursor.fetchone()
 
                     if not profile:
                         await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                         return
                     
-                    bank, realestate_json, realestatelastcollected_json = profile
+                    cash, realestate_json, realestatelastcollected_json = profile
 
                     user_realestates = json.loads(realestate_json) if realestate_json else []
 
@@ -118,14 +118,14 @@ class RealestateCollectDropdown(discord.ui.Select):
         try:
 
             async with aiosqlite.connect('profiles.db') as db:
-                async with db.execute('''SELECT bank, realestate, realestatelastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (interaction.guild.id, interaction.user.id)) as cursor:
+                async with db.execute('''SELECT cash, realestate, realestatelastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (interaction.guild.id, interaction.user.id)) as cursor:
                     profile = await cursor.fetchone()
 
                     if not profile:
                         await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                         return
                     
-                    bank, realestate_json, realestatelastcollected_json = profile
+                    cash, realestate_json, realestatelastcollected_json = profile
 
                     realestate_pay = property.GetPay()
                     
@@ -146,8 +146,8 @@ class RealestateCollectDropdown(discord.ui.Select):
 
                         updated_collection = json.dumps(realestatelastcollected_json)
 
-                        new_bank = bank + realestate_pay
-                        await db.execute('''UPDATE profiles SET bank = ?, realestatelastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_bank, updated_collection, interaction.guild.id, interaction.user.id))
+                        new_cash = cash + realestate_pay
+                        await db.execute('''UPDATE profiles SET cash = ?, realestatelastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, updated_collection, interaction.guild.id, interaction.user.id))
                         await db.commit()
 
                         embed = discord.Embed(
@@ -171,13 +171,13 @@ class RealestateCollectDropdown(discord.ui.Select):
                         
                         else:
                             paycheck = int(realestate_pay * (time_since_collect["months"]))
-                            new_bank = bank+paycheck
+                            new_cash = cash+paycheck
                             realestatelastcollected_json[property_key] = datetime.now().isoformat()
 
                             updated_collection = json.dumps(realestatelastcollected_json)
 
                             
-                            await db.execute('''UPDATE profiles SET bank = ?, realestatelastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_bank, updated_collection, interaction.guild.id, interaction.user.id))
+                            await db.execute('''UPDATE profiles SET cash = ?, realestatelastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, updated_collection, interaction.guild.id, interaction.user.id))
                             await db.commit()
 
                             embed = discord.Embed(
@@ -234,25 +234,24 @@ class RealestateDropdown(discord.ui.Select):
                     if realestate_json:
                         try:
                             existing_properties = json.loads(realestate_json)
-                            # Ensure it's a list
+
                             if not isinstance(existing_properties, list):
-                                existing_properties = []  # Reset to an empty list if invalid
+                                existing_properties = []  
                         except json.JSONDecodeError:
-                            existing_properties = []  # Fallback to an empty list if decoding fails
+                            existing_properties = []  
                     else:
-                        existing_properties = []  # Initialize an empty list if the field is empty
+                        existing_properties = [] 
 
                     if property_key in existing_properties:
                         await interaction.response.send_message(embed=discord.Embed(description="`You already own this building`", colour=constants.colorHexes["Danger"]))
                         return
 
-                    # Add the purchased property
+
                     existing_properties.append(property_key)
 
-                    # Convert back to JSON for storage
+
                     updated_realestate = json.dumps(existing_properties)
 
-                    # Deduct cash and save to the database
                     new_cash = cash - property.GetCost()
                     await db.execute(
                         '''UPDATE profiles SET cash = ?, realestate = ? WHERE guild_id = ? AND user_id = ?''',

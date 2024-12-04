@@ -4,5 +4,6 @@ colorHexes = {
     "LightBlue": 0x3C5E86,
     "SkyBlue": 0x95B2D2,
     "Danger": 0xE01A31,
-    "Success": 0x90FF6F
+    "Success": 0x90FF6F,
+    "Neutral": 0x6D6F78
 }

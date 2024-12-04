@@ -53,14 +53,14 @@ class Business(commands.Cog):
         guild_id = interaction.guild.id
 
         async with aiosqlite.connect('profiles.db') as db:
-            async with db.execute('''SELECT bank, businesses, businesseslastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
+            async with db.execute('''SELECT cash, businesses, businesseslastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (guild_id, user_id)) as cursor:
                 profile = await cursor.fetchone()
 
                 if not profile:
                     await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                     return
                 
-                bank, businesses_json, businesseslastcollected_json = profile
+                cash, businesses_json, businesseslastcollected_json = profile
 
                 user_businesses = json.loads(businesses_json) if businesses_json else []
 
@@ -110,14 +110,14 @@ class BusinessCollectDropdown(discord.ui.Select):
         try:
 
             async with aiosqlite.connect('profiles.db') as db:
-                async with db.execute('''SELECT bank, businesses, businesseslastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (interaction.guild.id, interaction.user.id)) as cursor:
+                async with db.execute('''SELECT cash, businesses, businesseslastcollected FROM profiles WHERE guild_id = ? AND user_id = ?''', (interaction.guild.id, interaction.user.id)) as cursor:
                     profile = await cursor.fetchone()
 
                     if not profile:
                         await interaction.response.send_message(embed=basicEmbeds["SelfNoProfile"], ephemeral=True)
                         return
                     
-                    bank, businesses_json, businesseslastcollected_json = profile
+                    cash, businesses_json, businesseslastcollected_json = profile
 
                     business_pay = business.get_pay()
 
@@ -137,9 +137,9 @@ class BusinessCollectDropdown(discord.ui.Select):
 
                         updated_collecton = json.dumps(businesseslastcollected_json)
 
-                        new_bank = bank + business_pay
+                        new_cash = cash + business_pay
 
-                        await db.execute('''UPDATE profiles SET bank = ?, businesseslastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_bank, updated_collecton, interaction.guild.id, interaction.user.id))
+                        await db.execute('''UPDATE profiles SET cash = ?, businesseslastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, updated_collecton, interaction.guild.id, interaction.user.id))
                         await db.commit()
 
                         embed = discord.Embed(
@@ -163,13 +163,13 @@ class BusinessCollectDropdown(discord.ui.Select):
                         
                         else:
                             paycheck = int(business_pay * (time_since_collect["days"]))
-                            new_bank = bank+paycheck
+                            new_cash = cash+paycheck
 
                             businesseslastcollected_json[business_key] = datetime.now().isoformat()
 
                             updated_collecton = json.dumps(businesseslastcollected_json)
 
-                            await db.execute('''UPDATE profiles SET bank = ?, businesseslastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_bank, updated_collecton, interaction.guild.id, interaction.user.id))
+                            await db.execute('''UPDATE profiles SET cash = ?, businesseslastcollected = ? WHERE guild_id = ? AND user_id = ?''', (new_cash, updated_collecton, interaction.guild.id, interaction.user.id))
                             await db.commit()
 
                             embed = discord.Embed(
