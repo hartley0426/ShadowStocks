@@ -690,14 +690,20 @@ class WithdrawModal(discord.ui.Modal, title="Withdraw Cash"):
                             await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
                     else:
                         fee = 0
-                        await self.process_withdraw(db, interaction, accounts_json, account_obj, account_id, withdraw_amount, fee)
+                        await self.process_withdraw(db, interaction, accounts_json, account_obj, account_id, withdraw_amount, fee, time_since_action)
         except Exception as e:
             await interaction.response.send_message(embed=discord.Embed(description=f"`Error: {e}`", colour=constants.colorHexes["Danger"]), ephemeral=True)
 
-    async def process_withdraw(self, db, interaction, accounts_json, account_obj, account_id, withdraw_amount, fee):
-        account_obj.set_balance(account_obj.get_balance() - withdraw_amount)
+    async def process_withdraw(self, db, interaction, accounts_json, account_obj, account_id, withdraw_amount, fee, time_since_action):
+
+        interest_percentage = 0.04
+
+        calculated_interest = int(time_since_action["months"]) * (int(account_obj.get_balance()) * interest_percentage)
+        account_obj.set_balance(account_obj.get_balance() - withdraw_amount + calculated_interest)
         account_obj.set_last_action(datetime.now())
         accounts_json[account_id] = account_obj.to_dict()
+
+        
 
         new_cash = self.cash - withdraw_amount - fee
         updated_accounts_json = json.dumps(accounts_json)
